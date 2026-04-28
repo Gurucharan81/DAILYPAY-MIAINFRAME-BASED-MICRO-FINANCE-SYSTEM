@@ -1,0 +1,201 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. NEWUSRPT.
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+     **PROGRAMIS WORKING PERFECTLY NO NEED TO CHECK
+           SELECT LOANFILE ASSIGN TO INLOAN
+               ORGANIZATION IS INDEXED
+               ACCESS MODE IS DYNAMIC
+               RECORD KEY IS LOAN-ID
+               FILE STATUS IS FS1.
+           SELECT CUSTFILE ASSIGN TO INCUST
+               ORGANIZATION IS INDEXED
+               ACCESS MODE IS RANDOM
+               RECORD KEY IS CUST-ID1
+               FILE STATUS IS FS2.
+           SELECT RPTFILE ASSIGN TO OUTGDG
+           ORGANIZATION IS SEQUENTIAL
+           FILE STATUS IS FS3.
+       DATA DIVISION.
+       FILE SECTION.
+      *---------- FULL LOAN FILE ----------------*
+       FD LOANFILE.
+       01 WS-LOAN-REC.
+          05 LOAN-ID         PIC X(6).
+          05 CUST-ID         PIC 9(5).
+          05 SANC-AMT        PIC 9(6).
+          05 EMI-START       PIC X(10).
+          05 EMI-END         PIC X(10).
+          05 INTEREST        PIC 9(2).
+          05 EMI-AMT         PIC 9(6).
+          05 GRACE-DAYS      PIC 9(2).
+          05 PENALTY-AMT     PIC 9(3).
+          05 PAY-MODE        PIC X(3).
+          05 PROC-DATE       PIC X(10).
+          05 TOTAL-PAID      PIC 9(6).
+          05 NEXT-DUE        PIC 9(6).
+          05 STATUS1         PIC X(6).
+          05 TENURE          PIC 9(3).
+          05 OVERDUE-AMT     PIC 9(6).
+          05 NO-OF-EMI       PIC 9(3).
+          05 FORECLOSURE     PIC 9(6).
+          05 DUE-DAYS        PIC 9(3).
+          05 DUE-AMT         PIC 9(6).
+          05 RISK-SCORE      PIC 99.
+      *---------- FULL CUSTOMER FILE ----------------*
+       FD CUSTFILE.
+       01 WS-CUST-REC.
+          05 CUST-ID1       PIC X(5).
+          05 CUST-AADH      PIC X(12).
+          05 CUST-NAME      PIC X(20).
+          05 CUST-DOB       PIC X(10).
+          05 AGE            PIC 9(3).
+          05 GENDER         PIC X(6).
+          05 MOBILE         PIC X(10).
+          05 ADDRESS2       PIC X(23).
+          05 OCCUPATION     PIC X(20).
+          05 INCOME         PIC 9(6).
+          05 NOM-NAME       PIC X(20).
+          05 NOM-REL        PIC X(10).
+          05 NOM-MOB        PIC 9(10).
+          05 NOM-AADH       PIC X(12).
+          05 WS-LOAN-SEQ    PIC 9(1).
+          05 LOANS OCCURS 5 TIMES.
+             10 CUST-LOAN-ID PIC 9(6).
+      *---------- OUTPUT ----------------*
+       FD RPTFILE.
+       01 RPT-REC PIC X(150).
+       WORKING-STORAGE SECTION.
+       01 WS-SPACES   PIC X(150) VALUE SPACES.
+       01 WS-EOF PIC X VALUE 'N'.
+       01 WS-DATE PIC X(10).
+       01 FS3  PIC XX.
+       01 FS1  PIC XX.
+       01 FS2  PIC XX.
+      * HEADER
+       01 WS-HEADER1.
+          05 FILLER PIC X(20) VALUE 'NEW USER REPORT'.
+          05 FILLER PIC X(120) VALUE SPACES.
+          05 WS-HDATE PIC X(10).
+       01 WS-HEADER2.
+          05 FILLER PIC X(6)  VALUE 'LOANID'.
+          05 FILLER PIC X     VALUE SPACE.
+          05 FILLER PIC X(6)  VALUE 'CUSTID'.
+          05 FILLER PIC X     VALUE SPACE.
+          05 FILLER PIC X(20) VALUE 'NAME'.
+          05 FILLER PIC X     VALUE SPACE.
+          05 FILLER PIC X(3)  VALUE 'AGE'.
+          05 FILLER PIC X     VALUE SPACE.
+          05 FILLER PIC X(8)  VALUE 'SANC-AMT'.
+          05 FILLER PIC X     VALUE SPACE.
+          05 FILLER PIC X(10) VALUE 'EMI-START'.
+          05 FILLER PIC X     VALUE SPACE.
+          05 FILLER PIC X(10) VALUE 'EMI-END'.
+          05 FILLER PIC X     VALUE SPACE.
+          05 FILLER PIC X(3)  VALUE 'INT'.
+          05 FILLER PIC X     VALUE SPACE.
+          05 FILLER PIC X(7)  VALUE 'EMI-AMT'.
+          05 FILLER PIC X     VALUE SPACE.
+          05 FILLER PIC X(4)  VALUE 'MODE'.
+          05 FILLER PIC X     VALUE SPACE.
+          05 FILLER PIC X(6)  VALUE 'TENURE'.
+          05 FILLER PIC X     VALUE SPACE.
+          05 FILLER PIC X(10) VALUE 'MOBILE'.
+          05 FILLER PIC X     VALUE SPACE.
+          05 FILLER PIC X(20) VALUE 'OCCUPATION'.
+          05 FILLER PIC X     VALUE SPACE.
+          05 FILLER PIC X(6)  VALUE 'INCOME'.
+       01 WS-DASH PIC X(150) VALUE ALL '-'.
+      * DATA LINE
+       01 WS-LINE.
+          05 R-LOAN-ID    PIC Z(6).
+          05 FILLER       PIC X VALUE SPACE.
+          05 R-CUST-ID    PIC Z(5).
+          05 FILLER       PIC X VALUE SPACE.
+          05 R-NAME       PIC X(20).
+          05 FILLER       PIC X VALUE SPACE.
+          05 R-AGE        PIC Z(3).
+          05 FILLER       PIC X VALUE SPACE.
+          05 R-SANC-AMT   PIC Z(8).
+          05 FILLER       PIC X VALUE SPACE.
+          05 R-EMI-START  PIC X(10).
+          05 FILLER       PIC X VALUE SPACE.
+          05 R-EMI-END    PIC X(10).
+          05 FILLER       PIC X VALUE SPACE.
+          05 R-INTEREST   PIC Z(2).
+          05 FILLER       PIC X VALUE SPACE.
+          05 R-EMI-AMT    PIC Z(7).
+          05 FILLER       PIC X VALUE SPACE.
+          05 R-PAY-MODE   PIC X(4).
+          05 FILLER       PIC X VALUE SPACE.
+          05 R-TENURE     PIC Z(6).
+          05 FILLER       PIC X VALUE SPACE.
+          05 R-MOBILE     PIC X(10).
+          05 FILLER       PIC X VALUE SPACE.
+          05 R-OCCUP      PIC X(20).
+          05 FILLER       PIC X VALUE SPACE.
+          05 R-INCOME     PIC Z(6).
+       PROCEDURE DIVISION.
+       MAIN-PARA.
+           OPEN I-O LOANFILE CUSTFILE
+                OUTPUT RPTFILE
+                DISPLAY FS3 FS1 FS2
+           MOVE FUNCTION CURRENT-DATE(1:10) TO WS-HDATE
+           WRITE RPT-REC FROM WS-HEADER1
+           WRITE RPT-REC FROM WS-SPACES
+           WRITE RPT-REC FROM WS-HEADER2
+           WRITE RPT-REC FROM WS-DASH
+           MOVE 'N' TO WS-EOF
+           MOVE LOW-VALUES TO LOAN-ID
+           START LOANFILE KEY IS >= LOAN-ID
+                   INVALID KEY DISPLAY 'ID NOT FOUND'
+                   NOT INVALID KEY PERFORM  PERFORM-PARA
+           END-START
+                DISPLAY FS3 FS1 FS2
+           PERFORM EXIT-PARA.
+       PERFORM-PARA.
+           PERFORM UNTIL WS-EOF = 'Y'
+               DISPLAY 'HI'
+               READ LOANFILE NEXT RECORD
+                   AT END MOVE 'Y' TO WS-EOF
+                   NOT AT END PERFORM READ-PARA
+               END-READ
+                DISPLAY FS3 FS1 FS2
+           END-PERFORM.
+       READ-PARA.
+               IF WS-EOF = 'N' AND STATUS1 = 'NEW   '
+                   DISPLAY 'ID FOUND' CUST-ID
+                   MOVE CUST-ID TO CUST-ID1
+                   READ CUSTFILE KEY IS CUST-ID1
+                       INVALID KEY
+                         DISPLAY 'GURU'
+      *                  NOT INVALID KEY PERFORM WRITE-PARA
+                   END-READ
+      *            END-IF.
+      *WRITE-PARA.
+                           DISPLAY WS-LINE
+                           MOVE LOAN-ID     TO R-LOAN-ID
+                           MOVE CUST-ID     TO R-CUST-ID
+                           MOVE CUST-NAME   TO R-NAME
+                           MOVE AGE         TO R-AGE
+                           MOVE SANC-AMT    TO R-SANC-AMT
+                           MOVE EMI-START   TO R-EMI-START
+                           MOVE EMI-END     TO R-EMI-END
+                           MOVE INTEREST    TO R-INTEREST
+                           MOVE EMI-AMT     TO R-EMI-AMT
+                           MOVE PAY-MODE    TO R-PAY-MODE
+                           MOVE TENURE      TO R-TENURE
+                           MOVE MOBILE      TO R-MOBILE
+                           MOVE OCCUPATION  TO R-OCCUP
+                           MOVE INCOME      TO R-INCOME
+                           MOVE 'ACTIVE' TO STATUS1
+                           DISPLAY WS-LINE
+                           WRITE RPT-REC FROM WS-LINE
+                           REWRITE WS-LOAN-REC
+      *            END-READ
+               END-IF.
+       EXIT-PARA.
+           CLOSE LOANFILE CUSTFILE RPTFILE
+           STOP RUN.
+

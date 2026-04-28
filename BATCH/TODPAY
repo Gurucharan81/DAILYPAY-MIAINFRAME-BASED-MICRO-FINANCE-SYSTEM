@@ -1,0 +1,246 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. TODPAY.
+      *WORKING WELL
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+
+           SELECT TARGET-FILE ASSIGN TO TARGET
+               ORGANIZATION IS INDEXED
+               ACCESS MODE IS DYNAMIC
+               RECORD KEY IS T-LOAN-ID
+               FILE STATUS IS FS1.
+
+           SELECT PAID-FILE ASSIGN TO PAIDOUT
+               ORGANIZATION IS SEQUENTIAL
+               ACCESS MODE IS SEQUENTIAL
+               FILE STATUS IS FS2.
+
+           SELECT PAY-FILE ASSIGN TO PAYMENT
+               ORGANIZATION IS INDEXED
+               ACCESS MODE IS SEQUENTIAL
+               RECORD KEY IS P-TRANS-ID
+               FILE STATUS IS FS3.
+
+           SELECT DELQ-FILE ASSIGN TO DELQOUT
+               ORGANIZATION IS SEQUENTIAL
+               ACCESS MODE IS SEQUENTIAL
+               FILE STATUS IS FS4.
+
+       DATA DIVISION.
+       FILE SECTION.
+
+       FD TARGET-FILE.
+       01 TARGET-REC.
+          05 T-LOAN-ID    PIC X(6).
+          05 T-CUST-ID    PIC X(5).
+          05 T-NAME       PIC X(10).
+          05 T-STATUS     PIC X(8).
+          05 T-ACT-AMT    PIC 9(6).
+          05 T-AMT-PAID   PIC 9(6).
+          05 T-PAY-TYPE   PIC X.
+          05 T-YORN       PIC X.
+          05 T-BEST       PIC X(37).
+
+       FD PAY-FILE.
+       01 PAY-REC.
+          05 P-TRANS-ID   PIC X(11).
+          05 P-LOAN-ID    PIC X(6).
+          05 P-CUST-ID    PIC X(5).
+          05 P-NAME       PIC X(10).
+          05 P-STATUS     PIC X(8).
+          05 P-ACT-AMT    PIC 9(6).
+          05 P-AMT-PAID   PIC 9(6).
+          05 P-PAY-TYPE   PIC X.
+          05 P-YORN       PIC X.
+          05 P-BEST       PIC X(26).
+
+       FD PAID-FILE RECORDING MODE IS F.
+       01 PAID-REC.
+          05 PAID-DATA PIC X(80).
+
+       FD DELQ-FILE RECORDING MODE IS F.
+       01 DELQ-REC.
+          05 DELQ-DATA PIC X(80).
+
+       WORKING-STORAGE SECTION.
+       01 WS-EOF1      PIC X VALUE 'N'.
+       01 WS-EOF2      PIC X VALUE 'N'.
+       01 FS1          PIC XX.
+       01 FS2          PIC XX.
+       01 FS3          PIC XX.
+       01 FS4          PIC XX.
+       01 WS-DATE      PIC X(10).
+       01 WS-ACT-AMT   PIC Z(6).
+       01 WS-PAID-AMT  PIC Z(6).
+
+       PROCEDURE DIVISION.
+
+       MAIN-PARA.
+
+           OPEN I-O TARGET-FILE
+                INPUT PAY-FILE
+                OUTPUT PAID-FILE DELQ-FILE
+
+           IF FS1 NOT = '00'
+              DISPLAY 'ERROR OPEN TARGET: ' FS1
+              STOP RUN
+           END-IF
+
+           IF FS3 NOT = '00'
+              DISPLAY 'ERROR OPEN PAY: ' FS3
+              STOP RUN
+           END-IF
+
+      *--- STEP 1: UPDATE TARGET ---*
+
+           PERFORM UNTIL WS-EOF1 = 'Y'
+
+              READ PAY-FILE
+                 AT END
+                    MOVE 'Y' TO WS-EOF1
+                 NOT AT END
+                    PERFORM UPDATE-TARGET
+              END-READ
+
+           END-PERFORM
+
+           CLOSE TARGET-FILE
+           OPEN INPUT TARGET-FILE
+
+           IF FS1 NOT = '00'
+              DISPLAY 'ERROR REOPEN TARGET: ' FS1
+              STOP RUN
+           END-IF
+
+      *--- POSITION FILE ---*
+
+           MOVE LOW-VALUES TO T-LOAN-ID
+
+           START TARGET-FILE KEY >= T-LOAN-ID
+
+           IF FS1 NOT = '00'
+              DISPLAY 'START FAILED: ' FS1
+              MOVE 'Y' TO WS-EOF2
+           END-IF
+
+      *--- WRITE HEADERS ---*
+
+           PERFORM WRITE-HEADERS
+
+      *--- STEP 2: SPLIT FILE ---*
+
+           PERFORM UNTIL WS-EOF2 = 'Y'
+
+              READ TARGET-FILE NEXT
+                 AT END
+                    MOVE 'Y' TO WS-EOF2
+                 NOT AT END
+                    PERFORM SPLIT-REC
+              END-READ
+
+              IF FS1 NOT = '00' AND FS1 NOT = '10'
+                 DISPLAY 'READ ERROR: ' FS1
+                 MOVE 'Y' TO WS-EOF2
+              END-IF
+
+           END-PERFORM
+
+           CLOSE TARGET-FILE PAY-FILE PAID-FILE DELQ-FILE
+
+           STOP RUN.
+
+      *--- UPDATE TARGET ---*
+
+       UPDATE-TARGET.
+
+           MOVE P-LOAN-ID TO T-LOAN-ID
+
+           READ TARGET-FILE KEY IS T-LOAN-ID
+
+           IF FS1 = '00'
+              MOVE P-YORN     TO T-YORN
+              MOVE P-AMT-PAID TO T-AMT-PAID
+
+              REWRITE TARGET-REC
+
+              IF FS1 NOT = '00'
+                 DISPLAY 'REWRITE FAILED: ' T-LOAN-ID
+              END-IF
+
+           ELSE
+              DISPLAY 'NOT FOUND: ' P-LOAN-ID
+           END-IF.
+
+      *--- SPLIT RECORD ---*
+
+       SPLIT-REC.
+
+           IF T-YORN = 'Y'
+              PERFORM WRITE-PAID
+           ELSE
+              PERFORM WRITE-DELQ
+           END-IF.
+
+      *--- WRITE PAID ---*
+
+       WRITE-PAID.
+
+           MOVE SPACES TO PAID-DATA
+
+            MOVE T-ACT-AMT  TO WS-ACT-AMT
+            MOVE T-AMT-PAID TO WS-PAID-AMT
+
+           STRING
+             T-LOAN-ID  ' '
+             T-CUST-ID  ' '
+             T-NAME     ' '
+             T-ACT-AMT  ' '
+             T-AMT-PAID ' '
+             T-PAY-TYPE
+             DELIMITED BY SIZE
+             INTO PAID-DATA
+           END-STRING
+
+           WRITE PAID-REC.
+
+      *--- WRITE DELQ ---*
+
+       WRITE-DELQ.
+
+           MOVE SPACES TO DELQ-DATA
+           MOVE T-ACT-AMT  TO WS-ACT-AMT
+           MOVE T-AMT-PAID TO WS-PAID-AMT
+
+           STRING
+             T-LOAN-ID  ' '
+             T-CUST-ID  ' '
+             T-NAME     ' '
+             T-ACT-AMT  ' '
+             T-AMT-PAID
+             DELIMITED BY SIZE
+             INTO DELQ-DATA
+           END-STRING
+
+           WRITE DELQ-REC.
+
+      *--- HEADERS ---*
+
+       WRITE-HEADERS.
+           MOVE FUNCTION CURRENT-DATE(1:10) TO WS-HDATE
+           MOVE WS-HDATE TO PAID-REC(70:10)
+           MOVE 'PAID REPORT' TO PAID-DATA
+           WRITE PAID-REC
+
+      *    MOVE WS-HDATE TO DELQ-REC(70:10)
+      *    MOVE 'DELINQUENCY REPORT' TO DELQ-DATA
+      *    WRITE DELQ-REC
+
+           MOVE 'LOANID CUSTID NAME ACT-AMT PAID-AMT TYPE'
+                TO PAID-DATA
+           WRITE PAID-REC
+
+      *    MOVE 'LOANID CUSTID NAME ACT-AMT PAID-AMT'
+      *         TO DELQ-DATA
+      *    WRITE DELQ-REC.
+

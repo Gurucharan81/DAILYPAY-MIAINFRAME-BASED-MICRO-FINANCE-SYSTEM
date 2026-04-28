@@ -1,0 +1,121 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. DELIQUNT.
+
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+
+           SELECT LOAN-FILE ASSIGN TO  LOANFILE
+           ORGANIZATION IS INDEXED
+           ACCESS MODE IS RANDOM
+           RECORD KEY IS LOAN-ID
+           FILE STATUS IS FS1.
+           SELECT DELQ-FILE ASSIGN TO  DELQFILE
+           ORGANIZATION IS SEQUENTIAL
+           FILE STATUS IS  FS2.
+
+       DATA DIVISION.
+       FILE SECTION.
+
+       FD  LOAN-FILE.
+       01  LOAN-REC.
+            05 LOAN-ID         PIC X(6).
+            05 CUST-ID         PIC 9(5).
+            05 SANC-AMT        PIC 9(6).
+            05 EMI-START       PIC X(10).
+            05 EMI-END         PIC X(10).
+            05 INTEREST        PIC 9(2).
+            05 EMI-AMT         PIC 9(6).
+            05 GRACE-DAYS      PIC 9(2).
+            05 PENALTY-AMT     PIC 9(3).
+            05 PAY-MODE       PIC X(2).
+            05 TODAY-STATUS    PIC X.
+            05 PROC-DATE       PIC X(10).
+            05 TOTAL-PAID      PIC 9(6).
+            05 NEXT-DUE        PIC 9(6).
+            05 STATUS1         PIC X(6).
+            05 TENURE          PIC 9(3).
+            05 OVERDUE-AMT     PIC 9(6).
+            05 NO-OF-EMI       PIC 9(3).
+            05 FORECLOSURE     PIC 9(6).
+            05 DUE-DAYS        PIC 9(3).
+            05 DUE-AMT         PIC 9(6).
+            05 RISK-SCORE      PIC XX.
+       FD DELQ-FILE
+            RECORDING MODE IS F.
+       01 DELQ-REC.
+            05 D-LOAN-ID      PIC X(6).
+            05 FILLER         PIC X.
+            05 D-CUST-ID      PIC X(5).
+            05 FILLER         PIC X.
+            05 D-NAME          PIC X(10).
+            05 FILLER         PIC X.
+            05 D-ACT-AMT        PIC 9(6).
+            05 FILLER         PIC X.
+            05 D-AMT-PAID     PIC 9(6).
+            05 BEST          PIC X(43).
+
+       WORKING-STORAGE SECTION.
+
+       01 WS-EOF           PIC X VALUE 'N'.
+       01 WS-TODAY         PIC 9(8) VALUE 20260419.
+       01 FS1              PIC XX.
+       01 FS2              PIC XX.
+
+       PROCEDURE DIVISION.
+
+       MAIN-PARA.
+
+             OPEN I-O DELQ-FILE
+             OPEN I-O LOAN-FILE
+             READ DELQ-FILE
+             READ DELQ-FILE
+           PERFORM UNTIL WS-EOF = 'Y'
+
+              READ DELQ-FILE
+                 AT END
+                    MOVE 'Y' TO WS-EOF
+                 NOT AT END
+                    PERFORM PROCESS-DELQ
+              END-READ
+
+           END-PERFORM
+
+           CLOSE LOAN-FILE DELQ-FILE
+
+           STOP RUN.
+
+
+       PROCESS-DELQ.
+               MOVE D-LOAN-ID TO LOAN-ID
+               READ LOAN-FILE KEY IS LOAN-ID
+                  INVALID KEY
+                             DISPLAY 'NOT FOUND'
+               END-READ
+               DISPLAY LOAN-REC
+              ADD 1 TO DUE-DAYS
+              ADD NEXT-DUE TO DUE-AMT
+
+      *------ DETERMINE ACCOUNT STATUS -------------------------------*
+
+              EVALUATE TRUE
+
+                 WHEN DUE-DAYS < 3
+                      MOVE 'SOFT' TO STATUS1
+                      DISPLAY 'SOFT'
+                 WHEN DUE-DAYS < 7
+                      MOVE 'MODERATE' TO STATUS1
+
+                 WHEN DUE-DAYS >= 7 AND DUE-DAYS < 14
+                      MOVE 'DELINQUENT' TO STATUS1
+
+                 WHEN DUE-DAYS >= 14
+                      MOVE 'SERIOUS' TO STATUS1
+
+              END-EVALUATE
+              DISPLAY LOAN-REC.
+      *------ UPDATE LOAN FILE ---------------------------------------*
+
+              REWRITE LOAN-REC .
+
+

@@ -1,0 +1,49 @@
+CMPU    DFHMSD TYPE=&SYSPARM,MODE=INOUT,LANG=COBOL,STORAGE=AUTO,       X
+               CTRL=FREEKB,MAPATTS=(COLOR,HILIGHT)
+
+CMPU    DFHMDI SIZE=(24,80),LINE=1,COLUMN=1
+        DFHMDF POS=(1,2),LENGTH=5,ATTRB=(PROT),INITIAL='CMPU'
+*----------------------------------------------------------------*
+* TITLE
+*----------------------------------------------------------------*
+        DFHMDF POS=(3,28),LENGTH=28,                                   X
+               INITIAL='PASSWORD UPDATION SCREEN',ATTRB=PROT
+
+*----------------------------------------------------------------*
+* USER ID
+*----------------------------------------------------------------*
+        DFHMDF POS=(6,12),LENGTH=14,INITIAL='User id      :',ATTRB=PROT
+USERID  DFHMDF POS=(6,30),LENGTH=05,ATTRB=(PROT,IC),                   X
+               HILIGHT=UNDERLINE
+        DFHMDF POS=(6,36),LENGTH=1,ATTRB=ASKIP
+*----------------------------------------------------------------*
+* CURRENT PASSWORD
+*----------------------------------------------------------------*
+        DFHMDF POS=(8,12),LENGTH=14,INITIAL='Password     :',ATTRB=PROT
+PWD     DFHMDF POS=(8,30),LENGTH=05,ATTRB=UNPROT,HILIGHT=UNDERLINE
+        DFHMDF POS=(8,36),LENGTH=1,ATTRB=ASKIP
+*----------------------------------------------------------------*
+* NEW PASSWORD
+*----------------------------------------------------------------*
+        DFHMDF POS=(10,12),LENGTH=14,INITIAL='New Password :',         X
+               ATTRB=PROT
+NEWPWD  DFHMDF POS=(10,30),LENGTH=05,ATTRB=UNPROT,HILIGHT=UNDERLINE
+        DFHMDF POS=(10,36),LENGTH=1,ATTRB=ASKIP
+*----------------------------------------------------------------*
+* ACTION LINE
+*----------------------------------------------------------------*
+        DFHMDF POS=(13,10),LENGTH=32,                                  X
+               INITIAL='Press Enter To Update Password ',ATTRB=PROT
+
+        DFHMDF POS=(16,10),LENGTH=4,INITIAL='MSG:',ATTRB=PROT
+MSG     DFHMDF POS=(16,15),LENGTH=50,ATTRB=PROT
+*----------------------------------------------------------------*
+* FUNCTION KEYS
+*----------------------------------------------------------------*
+        DFHMDF POS=(23,18),LENGTH=10,INITIAL='PF3=EXIT',ATTRB=PROT
+        DFHMDF POS=(23,34),LENGTH=06,INITIAL='ENTER=',ATTRB=PROT
+        DFHMDF POS=(23,41),LENGTH=15,INITIAL='UPDATE',ATTRB=PROT
+
+        DFHMSD TYPE=FINAL
+        END
+

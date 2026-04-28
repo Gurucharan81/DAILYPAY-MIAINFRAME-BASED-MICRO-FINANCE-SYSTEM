@@ -1,0 +1,84 @@
+MADB    DFHMSD TYPE=&SYSPARM,MODE=INOUT,LANG=COBOL,STORAGE=AUTO,       X
+               CTRL=FREEKB,MAPATTS=(COLOR,HILIGHT)
+MADB    DFHMDI SIZE=(24,80),LINE=1,COLUMN=1
+        DFHMDF POS=(1,2),LENGTH=5,ATTRB=(PROT),INITIAL='MADB'
+*----------------------------------------------------------------*
+* TITLE (LINE 2)
+*----------------------------------------------------------------*
+        DFHMDF POS=(2,30),LENGTH=16,                                   X
+               INITIAL='MASTER DASHBOARD',ATTRB=PROT
+*----------------------------------------------------------------*
+* DATE & TIME (START FROM COL 5)
+*----------------------------------------------------------------*
+        DFHMDF POS=(4,5),LENGTH=6,INITIAL='Date :',ATTRB=PROT
+DATEIN  DFHMDF POS=(4,15),LENGTH=10,ATTRB=(PROT),                      X
+               HILIGHT=UNDERLINE
+        DFHMDF POS=(4,26),LENGTH=1,ATTRB=ASKIP
+        DFHMDF POS=(4,50),LENGTH=6,INITIAL='Time :',ATTRB=PROT
+TIMEIN  DFHMDF POS=(4,60),LENGTH=8,ATTRB=PROT,HILIGHT=UNDERLINE
+        DFHMDF POS=(4,69),LENGTH=1,ATTRB=ASKIP
+*----------------------------------------------------------------*
+* TODAY SUMMARY HEADER
+*----------------------------------------------------------------*
+        DFHMDF POS=(6,30),LENGTH=13,                                   X
+               INITIAL='TODAY SUMMARY',ATTRB=PROT
+*----------------------------------------------------------------*
+* LEFT SIDE DATA (COL 5)
+*----------------------------------------------------------------*
+        DFHMDF POS=(8,5),LENGTH=18,                                    X
+               INITIAL='Active Loans      :',ATTRB=PROT
+ACTLOAN DFHMDF POS=(8,27),LENGTH=10,ATTRB=PROT,HILIGHT=UNDERLINE
+        DFHMDF POS=(8,38),LENGTH=1,ATTRB=ASKIP
+        DFHMDF POS=(8,45),LENGTH=20,                                   X
+               INITIAL='Collections Today :',ATTRB=PROT
+COLLTOD DFHMDF POS=(8,68),LENGTH=10,ATTRB=PROT,HILIGHT=UNDERLINE
+        DFHMDF POS=(8,79),LENGTH=1,ATTRB=ASKIP
+        DFHMDF POS=(10,5),LENGTH=20,                                   X
+               INITIAL='Overdue Accounts :',ATTRB=PROT
+OVRDUE  DFHMDF POS=(10,27),LENGTH=10,ATTRB=PROT,HILIGHT=UNDERLINE
+        DFHMDF POS=(10,38),LENGTH=1,ATTRB=ASKIP
+        DFHMDF POS=(10,45),LENGTH=22,                                  X
+               INITIAL='Disputes Open     :',ATTRB=PROT
+DSPTOPEN DFHMDF POS=(10,68),LENGTH=10,ATTRB=PROT,HILIGHT=UNDERLINE
+        DFHMDF POS=(10,79),LENGTH=1,ATTRB=ASKIP
+        DFHMDF POS=(12,5),LENGTH=18,                                   X
+               INITIAL='New Users Today  :',ATTRB=PROT
+NEWTOD  DFHMDF POS=(12,27),LENGTH=10,ATTRB=PROT,HILIGHT=UNDERLINE
+        DFHMDF POS=(12,38),LENGTH=1,ATTRB=ASKIP
+        DFHMDF POS=(12,45),LENGTH=20,                                  X
+               INITIAL='Closed Today      :',ATTRB=PROT
+CLOSED  DFHMDF POS=(12,68),LENGTH=10,ATTRB=PROT,HILIGHT=UNDERLINE
+        DFHMDF POS=(12,79),LENGTH=1,ATTRB=ASKIP
+*----------------------------------------------------------------*
+* MENU HEADER
+*----------------------------------------------------------------*
+        DFHMDF POS=(15,30),LENGTH=12,                                  X
+               INITIAL='MENU OPTIONS',ATTRB=PROT
+*----------------------------------------------------------------*
+* MENU OPTIONS (COL 5)
+*----------------------------------------------------------------*
+        DFHMDF POS=(17,10),LENGTH=30,                                  X
+               INITIAL='1. New Account Creation',ATTRB=PROT
+        DFHMDF POS=(18,10),LENGTH=30,                                  X
+               INITIAL='2. Customer A/C Details',ATTRB=PROT
+        DFHMDF POS=(19,10),LENGTH=30,                                  X
+               INITIAL='3. Delinquency Accounts',ATTRB=PROT
+        DFHMDF POS=(20,10),LENGTH=25,                                  X
+               INITIAL='4. Disputes Raised',ATTRB=PROT
+        DFHMDF POS=(21,10),LENGTH=25,                                  X
+               INITIAL='5. CONTROL RECORDS',ATTRB=PROT
+*----------------------------------------------------------------*
+* USER INPUT (COL 5)
+*----------------------------------------------------------------*
+        DFHMDF POS=(23,5),LENGTH=15,                                   X
+               INITIAL='Enter Choice :',ATTRB=PROT
+CHOICE  DFHMDF POS=(23,25),LENGTH=1,ATTRB=(UNPROT,IC),HILIGHT=UNDERLINE
+        DFHMDF POS=(23,27),LENGTH=1,ATTRB=ASKIP
+*----------------------------------------------------------------*
+* FUNCTION KEYS
+*----------------------------------------------------------------*
+        DFHMDF POS=(24,5),LENGTH=10,INITIAL='PF3=EXIT',ATTRB=PROT
+        DFHMDF POS=(24,40),LENGTH=13,INITIAL='PF10=SELECT',ATTRB=PROT
+        DFHMSD TYPE=FINAL
+        END
+

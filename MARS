@@ -1,0 +1,39 @@
+MARS    DFHMSD TYPE=MAP,MODE=INOUT,LANG=COBOL,STORAGE=AUTO,            X00010002
+               TIOAPFX=YES,CTRL=FREEKB,DSATTS=(COLOR,HILIGHT),         X00020000
+               MAPATTS=(COLOR,HILIGHT)                                  00030000
+MARS    DFHMDI SIZE=(24,80),LINE=1,COLUMN=1                             00040002
+        DFHMDF POS=(1,2),LENGTH=5,ATTRB=(PROT),INITIAL='MARS'           00041007
+        DFHMDF POS=(2,25),LENGTH=20,ATTRB=(PROT,BRT),                  X00050000
+               INITIAL='RECOVERY SCREEN'                                00060000
+        DFHMDF POS=(5,5),LENGTH=16,ATTRB=(PROT),                       X00070000
+               INITIAL='CUSTOMER ID  :'                                 00080000
+CIDIN   DFHMDF POS=(5,25),LENGTH=5,ATTRB=(PROT),HILIGHT=UNDERLINE       00090005
+        DFHMDF POS=(5,31),LENGTH=5,ATTRB=ASKIP                          00100005
+        DFHMDF POS=(7,5),LENGTH=16,ATTRB=(PROT),                       X00110000
+               INITIAL='LOAN A/C NO  :'                                 00120000
+LOANIN  DFHMDF POS=(7,25),LENGTH=6,ATTRB=(PROT),HILIGHT=UNDERLINE       00130005
+        DFHMDF POS=(7,32),LENGTH=5,ATTRB=ASKIP                          00140005
+        DFHMDF POS=(9,5),LENGTH=16,ATTRB=(PROT),                       X00150000
+               INITIAL='AMOUNT       :'                                 00160000
+AMTIN   DFHMDF POS=(9,25),LENGTH=7,                                    X00170008
+               ATTRB=(UNPROT,IC,NUM),HILIGHT=UNDERLINE                  00171006
+        DFHMDF POS=(9,33),LENGTH=5,ATTRB=ASKIP                          00180009
+        DFHMDF POS=(11,5),LENGTH=15,ATTRB=(PROT),                      X00190000
+               INITIAL='ORIGINAL DATE:'                                 00200000
+DATEIN  DFHMDF POS=(11,25),LENGTH=10,ATTRB=(UNPROT),HILIGHT=UNDERLINE   00210005
+        DFHMDF POS=(11,36),LENGTH=5,ATTRB=ASKIP                         00220005
+        DFHMDF POS=(13,30),LENGTH=20,ATTRB=(PROT),                     X00230000
+               INITIAL='" PRESS ENTER ¨'                                00240005
+        DFHMDF POS=(15,5),LENGTH=15,ATTRB=(PROT),                      X00250000
+               INITIAL='RECOVERY DATE:'                                 00260000
+RDATEIN DFHMDF POS=(15,25),LENGTH=10,ATTRB=(UNPROT),HILIGHT=UNDERLINE   00270005
+        DFHMDF POS=(15,36),LENGTH=5,ATTRB=ASKIP                         00280005
+        DFHMDF POS=(17,5),LENGTH=17,ATTRB=(PROT),                      X00290000
+               INITIAL='REMARKS      :'                                 00300000
+MSG     DFHMDF POS=(17,25),LENGTH=30,ATTRB=(PROT),HILIGHT=UNDERLINE     00310005
+        DFHMDF POS=(17,58),LENGTH=5,ATTRB=ASKIP                         00320000
+        DFHMDF POS=(20,5),LENGTH=60,ATTRB=(PROT),                      X00330000
+               INITIAL='          PF3=EXIT                     '        00340000
+        DFHMSD TYPE=FINAL                                               00350000
+               END                                                      00360000
+

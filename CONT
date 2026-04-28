@@ -1,0 +1,103 @@
+CONT    DFHMSD TYPE=&SYSPARM,MODE=INOUT,LANG=COBOL,STORAGE=AUTO,       X
+               CTRL=FREEKB,MAPATTS=(COLOR,HILIGHT)
+
+CONT    DFHMDI SIZE=(24,80),LINE=1,COLUMN=1
+        DFHMDF POS=(1,2),LENGTH=5,ATTRB=(PROT),INITIAL='CONT'
+*----------------------------------------------------------------*
+* TITLE
+*----------------------------------------------------------------*
+        DFHMDF POS=(2,26),LENGTH=26,                                   X
+               INITIAL='LOAN CONTROL PARAMETERS',ATTRB=PROT
+
+*----------------------------------------------------------------*
+* AGE CRITERIA
+*----------------------------------------------------------------*
+        DFHMDF POS=(4,5),LENGTH=12,INITIAL='AGE CRITERIA',ATTRB=PROT
+
+        DFHMDF POS=(5,5),LENGTH=12,INITIAL='Min Age :',ATTRB=PROT
+MINAGE  DFHMDF POS=(5,20),LENGTH=2,ATTRB=(UNPROT,IC),HILIGHT=UNDERLINE
+        DFHMDF POS=(5,23),LENGTH=1,ATTRB=ASKIP
+        DFHMDF POS=(5,40),LENGTH=12,INITIAL='Max Age :',ATTRB=PROT
+MAXAGE  DFHMDF POS=(5,55),LENGTH=3,ATTRB=UNPROT,HILIGHT=UNDERLINE
+        DFHMDF POS=(5,59),LENGTH=1,ATTRB=ASKIP
+*----------------------------------------------------------------*
+* SANCTION LIMITS
+*----------------------------------------------------------------*
+        DFHMDF POS=(7,5),LENGTH=15,INITIAL='SANCTION LIMITS',          X
+               ATTRB=PROT
+        DFHMDF POS=(8,5),LENGTH=20,                                    X
+               INITIAL='Min Sanction Amt :',ATTRB=PROT
+MINAMT  DFHMDF POS=(8,26),LENGTH=05,ATTRB=UNPROT,HILIGHT=UNDERLINE
+        DFHMDF POS=(8,32),LENGTH=1,ATTRB=ASKIP
+        DFHMDF POS=(8,45),LENGTH=20,                                   X
+               INITIAL='Max Sanction Amt :',ATTRB=PROT
+MAXAMT  DFHMDF POS=(8,66),LENGTH=06,ATTRB=UNPROT,HILIGHT=UNDERLINE
+        DFHMDF POS=(8,73),LENGTH=1,ATTRB=ASKIP
+*----------------------------------------------------------------*
+* TENURE RULES
+*----------------------------------------------------------------*
+        DFHMDF POS=(10,5),LENGTH=13,INITIAL='TENURE RULES',ATTRB=PROT
+
+        DFHMDF POS=(11,5),LENGTH=18,                                   X
+               INITIAL='Min Tenure (D)   :',ATTRB=PROT
+MINTEN  DFHMDF POS=(11,25),LENGTH=2,ATTRB=UNPROT,HILIGHT=UNDERLINE
+        DFHMDF POS=(11,28),LENGTH=1,ATTRB=ASKIP
+        DFHMDF POS=(11,45),LENGTH=18,                                  X
+               INITIAL='Max Tenure (D)   :',ATTRB=PROT
+MAXTEN  DFHMDF POS=(11,65),LENGTH=3,ATTRB=UNPROT,HILIGHT=UNDERLINE
+        DFHMDF POS=(11,69),LENGTH=1,ATTRB=ASKIP
+        DFHMDF POS=(12,5),LENGTH=19,                                   X
+               INITIAL='Max No of Loans  :',ATTRB=PROT
+MAXLOAN DFHMDF POS=(12,25),LENGTH=1,ATTRB=UNPROT,HILIGHT=UNDERLINE
+        DFHMDF POS=(12,28),LENGTH=1,ATTRB=ASKIP
+        DFHMDF POS=(12,33),LENGTH=30,                                  X
+               INITIAL='(held by one customer)',ATTRB=PROT
+
+*----------------------------------------------------------------*
+* INTEREST CONFIG
+*----------------------------------------------------------------*
+
+        DFHMDF POS=(14,5),LENGTH=28,                                   X
+               INITIAL='Interest Rate (%)         :',ATTRB=PROT
+INTRATE DFHMDF POS=(14,34),LENGTH=2,ATTRB=UNPROT,HILIGHT=UNDERLINE
+        DFHMDF POS=(14,37),LENGTH=1,ATTRB=ASKIP
+*----------------------------------------------------------------*
+* GRACE PERIOD
+*----------------------------------------------------------------*
+
+        DFHMDF POS=(16,5),LENGTH=27,                                   X
+               INITIAL='Grace Period (Days)       :',ATTRB=PROT
+GRACE   DFHMDF POS=(16,34),LENGTH=1,ATTRB=UNPROT,HILIGHT=UNDERLINE
+        DFHMDF POS=(16,36),LENGTH=1,ATTRB=ASKIP
+*----------------------------------------------------------------*
+* REAPPLICATION + SCORE
+*----------------------------------------------------------------*
+        DFHMDF POS=(18,5),LENGTH=28,                                   X
+               INITIAL='Reapplication Restriction :',ATTRB=PROT
+REAPP   DFHMDF POS=(18,34),LENGTH=3,ATTRB=UNPROT,HILIGHT=UNDERLINE
+        DFHMDF POS=(18,38),LENGTH=1,ATTRB=ASKIP
+        DFHMDF POS=(18,43),LENGTH=35,                                  X
+               INITIAL='(no. of days to reapply after rejection)',     X
+               ATTRB=PROT
+*----------------------------------------------------------------*
+* APPROVAL SCORE (SHIFTED TO NEXT LINE IF NEEDED)
+*----------------------------------------------------------------*
+        DFHMDF POS=(20,5),LENGTH=27,                                   X
+               INITIAL='Approval Threshold Score  :',ATTRB=PROT
+APPSCR  DFHMDF POS=(20,34),LENGTH=3,ATTRB=UNPROT,HILIGHT=UNDERLINE
+        DFHMDF POS=(20,38),LENGTH=1,ATTRB=ASKIP
+*----------------------------------------------------------------*
+* FUNCTION KEYS
+*----------------------------------------------------------------*
+        DFHMDF POS=(23,20),LENGTH=10,INITIAL='PF3=EXIT',ATTRB=PROT
+        DFHMDF POS=(23,35),LENGTH=07,INITIAL='ENTER=',ATTRB=PROT
+*----------------------------------------------------------------*
+* MESSAGE FIELD
+*----------------------------------------------------------------*
+        DFHMDF POS=(24,5),LENGTH=5,INITIAL='MSG :',ATTRB=PROT
+MSGFLD  DFHMDF POS=(24,12),LENGTH=60,ATTRB=PROT
+
+
+        DFHMSD TYPE=FINAL
+        END
+

@@ -1,0 +1,63 @@
+CMPS    DFHMSD TYPE=&SYSPARM,MODE=INOUT,LANG=COBOL,STORAGE=AUTO,       X
+               CTRL=FREEKB,MAPATTS=(COLOR,HILIGHT)
+
+CMPS    DFHMDI SIZE=(24,80),LINE=1,COLUMN=1
+
+TITLE   DFHMDF POS=(2,25),LENGTH=21,                                   X
+               INITIAL='ONLINE PAYMENT SCREEN',ATTRB=(PROT,BRT)
+
+        DFHMDF POS=(4,2),LENGTH=20,                                    X
+               INITIAL='CUST ID           :',ATTRB=PROT
+
+CUSTID  DFHMDF POS=(4,24),LENGTH=5,                                    X
+               ATTRB=(UNPROT,IC),HILIGHT=UNDERLINE
+        DFHMDF POS=(4,30),LENGTH=1,ATTRB=(ASKIP)
+        DFHMDF POS=(4,50),LENGTH=7,                                    X
+               INITIAL='DATE :',ATTRB=PROT
+
+DATE    DFHMDF POS=(4,58),LENGTH=10,ATTRB=PROT,HILIGHT=UNDERLINE
+        DFHMDF POS=(4,69),LENGTH=1,ATTRB=(ASKIP)
+        DFHMDF POS=(6,2),LENGTH=20,                                    X
+               INITIAL='LOAN A/C NO       :',ATTRB=PROT
+
+LNACNO  DFHMDF POS=(6,24),LENGTH=6,ATTRB=(UNPROT),HILIGHT=UNDERLINE
+        DFHMDF POS=(6,31),LENGTH=1,ATTRB=(ASKIP)
+        DFHMDF POS=(7,2),LENGTH=20,                                    X
+               INITIAL='BANK NAME         :',ATTRB=PROT
+BANKNM  DFHMDF POS=(7,24),LENGTH=15,ATTRB=(UNPROT),HILIGHT=UNDERLINE
+        DFHMDF POS=(7,40),LENGTH=1,ATTRB=(ASKIP)
+        DFHMDF POS=(8,2),LENGTH=20,                                    X
+               INITIAL='BANK A/C NO       :',ATTRB=PROT
+
+BNACNO  DFHMDF POS=(8,24),LENGTH=10,ATTRB=(UNPROT),HILIGHT=UNDERLINE
+        DFHMDF POS=(8,35),LENGTH=1,ATTRB=(ASKIP)
+        DFHMDF POS=(9,2),LENGTH=20,                                    X
+               INITIAL='AMOUNT TO BE PAID :',ATTRB=PROT
+
+AMTOPD  DFHMDF POS=(9,24),LENGTH=6,ATTRB=(PROT,NUM),HILIGHT=UNDERLINE
+        DFHMDF POS=(9,31),LENGTH=1,ATTRB=(ASKIP)
+        DFHMDF POS=(10,2),LENGTH=20,                                   X
+               INITIAL='AMOUNT PAID       :',ATTRB=PROT
+
+AMTPAD  DFHMDF POS=(10,24),LENGTH=6,ATTRB=(UNPROT,NUM),                X
+               HILIGHT=UNDERLINE
+        DFHMDF POS=(10,31),LENGTH=1,ATTRB=(ASKIP)
+        DFHMDF POS=(11,2),LENGTH=20,                                   X
+               INITIAL='PIN               :',ATTRB=PROT
+
+PIN     DFHMDF POS=(11,24),LENGTH=5,                                   X
+               ATTRB=(UNPROT,NUM),HILIGHT=UNDERLINE
+        DFHMDF POS=(11,30),LENGTH=1,ATTRB=(ASKIP)
+        DFHMDF POS=(14,2),LENGTH=8,                                    X
+               INITIAL='MESSAGE:',ATTRB=PROT
+
+MSG     DFHMDF POS=(14,11),LENGTH=50,                                  X
+               ATTRB=(PROT,BRT)
+
+FOOTER  DFHMDF POS=(20,10),LENGTH=40,                                  X
+               INITIAL='PRESS ENTER TO COMPLETE TRANSACTION',          X
+               ATTRB=(PROT,BRT)
+
+        DFHMSD TYPE=FINAL
+               END
+

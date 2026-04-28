@@ -1,0 +1,67 @@
+CMDE    DFHMSD TYPE=&SYSPARM,MODE=INOUT,LANG=COBOL,STORAGE=AUTO,       X
+               CTRL=FREEKB,MAPATTS=(COLOR,HILIGHT)
+
+CMDE    DFHMDI SIZE=(24,80),LINE=1,COLUMN=1
+        DFHMDF POS=(1,2),LENGTH=5,ATTRB=(PROT),INITIAL='CMDE'
+*----------------------------------------------------------------*
+* TITLE
+*----------------------------------------------------------------*
+        DFHMDF POS=(3,30),LENGTH=22,INITIAL='DISPUTE ENTRY SCREEN',    XB=PROT
+               ATTRB=PROT
+*----------------------------------------------------------------*
+* USER DETAILS
+*----------------------------------------------------------------*
+        DFHMDF POS=(6,5),LENGTH=16,INITIAL='Customer ID    :',         X
+               ATTRB=PROT
+USERID  DFHMDF POS=(6,22),LENGTH=05,ATTRB=(UNPROT,IC),HILIGHT=UNDERLINE
+        DFHMDF POS=(6,28),LENGTH=1,ATTRB=ASKIP
+        DFHMDF POS=(8,5),LENGTH=16,INITIAL='LOAN ID        :',         X
+               ATTRB=PROT
+LOANID  DFHMDF POS=(8,22),LENGTH=06,ATTRB=(UNPROT),HILIGHT=UNDERLINE
+        DFHMDF POS=(8,29),LENGTH=1,ATTRB=ASKIP
+*----------------------------------------------------------------*
+* DATE OF DISPUTE (DD/MM/YYYY split fields)
+*----------------------------------------------------------------*
+        DFHMDF POS=(10,5),LENGTH=16,INITIAL='Date of Dispute:',        XT
+               ATTRB=PROT
+DD      DFHMDF POS=(10,22),LENGTH=2,ATTRB=UNPROT,HILIGHT=UNDERLINE
+        DFHMDF POS=(10,25),LENGTH=1,INITIAL='/',ATTRB=ASKIP
+
+MM      DFHMDF POS=(10,27),LENGTH=2,ATTRB=UNPROT,HILIGHT=UNDERLINE
+        DFHMDF POS=(10,30),LENGTH=1,INITIAL='/',ATTRB=ASKIP
+
+YYYY    DFHMDF POS=(10,32),LENGTH=4,ATTRB=UNPROT,HILIGHT=UNDERLINE
+        DFHMDF POS=(10,37),LENGTH=1,ATTRB=ASKIP
+        DFHMDF POS=(12,5),LENGTH=16,ATTRB=PROT,                        X
+               INITIAL='AMOUNT         :'
+AMT     DFHMDF POS=(12,22),LENGTH=6,ATTRB=UNPROT,HILIGHT=UNDERLINE
+        DFHMDF POS=(12,29),LENGTH=1,ATTRB=ASKIP
+*----------------------------------------------------------------*
+* DISPUTE TYPES
+*----------------------------------------------------------------*
+        DFHMDF POS=(14,5),LENGTH=14,INITIAL='Dispute Types:',          X
+               ATTRB=PROT
+        DFHMDF POS=(16,21),LENGTH=45,INITIAL='1. Duplicate payment Ask X
+               for Refund',ATTRB=PROT
+
+        DFHMDF POS=(17,21),LENGTH=45,INITIAL='2. Payment made Balance  X
+               not Updated' ATTRB=PROT
+
+*----------------------------------------------------------------*
+* OPTION INPUT
+*----------------------------------------------------------------*
+        DFHMDF POS=(20,5),LENGTH=20,INITIAL='Enter Option (1/2):',     X=PROT
+               ATTRB=PROT
+OPTION  DFHMDF POS=(20,26),LENGTH=1,ATTRB=UNPROT,HILIGHT=UNDERLINE
+        DFHMDF POS=(20,28),LENGTH=1,ATTRB=ASKIP
+*----------------------------------------------------------------*
+* FUNCTION KEYS
+*----------------------------------------------------------------*
+        DFHMDF POS=(23,10),LENGTH=10,INITIAL='PF3=EXIT',ATTRB=PROT
+        DFHMDF POS=(23,25),LENGTH=20,INITIAL='ENTER=SUBMIT DISPUTE',   X
+               ATTRB=PROT
+        DFHMDF POS=(23,48),LENGTH=05,INITIAL='MSG:',ATTRB=PROT
+MSG     DFHMDF POS=(23,54),LENGTH=25,ATTRB=PROT,COLOR=RED
+        DFHMSD TYPE=FINAL
+        END
+

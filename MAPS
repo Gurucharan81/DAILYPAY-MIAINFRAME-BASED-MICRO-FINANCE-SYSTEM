@@ -1,0 +1,67 @@
+MAPS    DFHMSD TYPE=MAP,MODE=INOUT,LANG=COBOL,STORAGE=AUTO,            X00010001
+               TIOAPFX=YES,CTRL=FREEKB,DSATTS=(COLOR,HILIGHT),         X00020000
+               MAPATTS=(COLOR,HILIGHT)                                  00030000
+MAPS    DFHMDI SIZE=(24,80),LINE=1,COLUMN=1                             00040001
+        DFHMDF POS=(1,2),LENGTH=5,ATTRB=(PROT),INITIAL='MAPS'           00041005
+TITLE   DFHMDF POS=(2,25),LENGTH=20,ATTRB=(PROT,BRT),                  X00050000
+               INITIAL='PAYMENT SCREEN'                                 00060000
+PSETUP  DFHMDF POS=(4,2),LENGTH=10,ATTRB=(PROT),INITIAL='PAYMENT'       00070000
+BNLBL   DFHMDF POS=(4,15),LENGTH=12,ATTRB=(PROT),INITIAL='DAILY PAY   ' 00080005
+BNIN    DFHMDF POS=(4,30),LENGTH=12,ATTRB=(PROT)                        00090008
+        DFHMDF POS=(4,43),LENGTH=1,ATTRB=ASKIP                          00100000
+DATELBL DFHMDF POS=(4,45),LENGTH=12,ATTRB=(PROT),INITIAL='DATE       :' 00110000
+DATEIN  DFHMDF POS=(4,60),LENGTH=10,ATTRB=(UNPROT),HILIGHT=UNDERLINE    00120000
+        DFHMDF POS=(4,72),LENGTH=5,ATTRB=ASKIP                          00130000
+CIDLBL  DFHMDF POS=(6,2),LENGTH=25,ATTRB=(PROT),                       X00140000
+               INITIAL='CUSTOMER ID              :'                     00150000
+CIDIN   DFHMDF POS=(6,30),LENGTH=5,ATTRB=PROT,HILIGHT=UNDERLINE         00160003
+        DFHMDF POS=(6,37),LENGTH=7,ATTRB=ASKIP                          00170000
+LOANLBL DFHMDF POS=(6,51),LENGTH=16,ATTRB=(PROT),                      X00180000
+               INITIAL='LOAN A/C NO    :'                               00190000
+LOANIN  DFHMDF POS=(6,68),LENGTH=6,ATTRB=(PROT),HILIGHT=UNDERLINE       00200007
+        DFHMDF POS=(6,75),LENGTH=1,ATTRB=ASKIP                          00210007
+NAMELBL DFHMDF POS=(7,2),LENGTH=25,ATTRB=(PROT),                       X00220000
+               INITIAL='CUSTOMERNAME            :'                      00230000
+NAMEIN  DFHMDF POS=(7,30),LENGTH=20,ATTRB=(PROT),HILIGHT=UNDERLINE      00240007
+AMTLBL  DFHMDF POS=(7,51),LENGTH=17,ATTRB=(PROT),                      X00250000
+               INITIAL='AMOUNT          :'                              00260000
+AMTIN   DFHMDF POS=(7,70),LENGTH=6,ATTRB=(PROT),HILIGHT=UNDERLINE       00270007
+        DFHMDF POS=(7,77),LENGTH=3,ATTRB=ASKIP                          00280007
+PMODE   DFHMDF POS=(9,2),LENGTH=25,ATTRB=(PROT),                       X00290000
+               INITIAL='PAYMENT MODE            :'                      00300000
+PMODEIN DFHMDF POS=(9,30),LENGTH=1,ATTRB=(UNPROT),HILIGHT=UNDERLINE     00310000
+        DFHMDF POS=(9,32),LENGTH=5,ATTRB=ASKIP                          00320000
+PAYDTLB DFHMDF POS=(9,51),LENGTH=16,ATTRB=(PROT),                      X00330000
+               INITIAL='PAYMENTDATE     :'                              00340000
+PAYDTIN DFHMDF POS=(9,68),LENGTH=10,ATTRB=(UNPROT),HILIGHT=UNDERLINE    00350000
+        DFHMDF POS=(9,79),LENGTH=1,ATTRB=ASKIP                          00360000
+BANKOPT DFHMDF POS=(10,30),LENGTH=15,ATTRB=(PROT),                     X00370000
+               INITIAL='1. BANK        '                                00380000
+        DFHMDF POS=(10,46),INITIAL='CUSTOMER PASSWORD:',LENGTH=18,     X00381004
+               ATTRB=PROT                                               00381103
+PASSUPD DFHMDF POS=(10,66),LENGTH=10,ATTRB=(UNPROT),HILIGHT=UNDERLINE   00382004
+        DFHMDF POS=(10,78),LENGTH=2,ATTRB=ASKIP                         00383004
+CASHOPT DFHMDF POS=(11,30),LENGTH=12,ATTRB=(PROT),                     X00390000
+               INITIAL='2. CASH        '                                00400000
+BANKLBL DFHMDF POS=(13,2),LENGTH=25,ATTRB=(PROT),                      X00410000
+               INITIAL='BANK NAME               :'                      00420000
+BANKIN  DFHMDF POS=(13,30),LENGTH=20,ATTRB=(UNPROT),HILIGHT=UNDERLINE   00430000
+        DFHMDF POS=(13,52),LENGTH=5,ATTRB=ASKIP                         00440000
+ACCLBL  DFHMDF POS=(14,2),LENGTH=25,ATTRB=(PROT),                      X00450000
+               INITIAL='A/C NO                  :'                      00460000
+ACCIN   DFHMDF POS=(14,30),LENGTH=10,ATTRB=(UNPROT),HILIGHT=UNDERLINE   00470000
+        DFHMDF POS=(14,41),LENGTH=5,ATTRB=ASKIP                         00480000
+AGENTLB DFHMDF POS=(15,2),LENGTH=25,ATTRB=(PROT),                      X00490000
+               INITIAL='AGENT ID                :'                      00500000
+AGENTIN DFHMDF POS=(15,30),LENGTH=10,ATTRB=(UNPROT),HILIGHT=UNDERLINE   00510000
+AGNOTE  DFHMDF POS=(15,45),LENGTH=20,ATTRB=(PROT),                     X00520000
+               INITIAL='(TO BE ASSIGN.)'                                00530000
+SMSLBL  DFHMDF POS=(17,2),LENGTH=25,ATTRB=(PROT),                      X00540000
+               INITIAL='SMS                     :'                      00550000
+SMSIN1  DFHMDF POS=(17,30),LENGTH=48,ATTRB=(UNPROT),HILIGHT=UNDERLINE   00560000
+SMSIN   DFHMDF POS=(17,79),LENGTH=1,ATTRB=ASKIP                         00570000
+ENTERMS DFHMDF POS=(20,25),LENGTH=15,ATTRB=(PROT,BRT),                 X00580000
+               INITIAL='[ PRESS ENTER ]'                                00590000
+        DFHMSD TYPE=FINAL                                               00600000
+                END                                                     00610000
+

@@ -1,0 +1,135 @@
+MAOV    DFHMSD TYPE=MAP,MODE=INOUT,LANG=COBOL,STORAGE=AUTO,            X00010001
+               TIOAPFX=YES,CTRL=FREEKB,DSATTS=(COLOR,HILIGHT),         X00020000
+               MAPATTS=(COLOR,HILIGHT)                                  00030000
+MAOV    DFHMDI SIZE=(24,80),LINE=1,COLUMN=1                             00040001
+        DFHMDF POS=(1,2),LENGTH=5,ATTRB=(PROT),INITIAL='MAOV'           00041003
+TITLE   DFHMDF POS=(2,25),LENGTH=35,ATTRB=(PROT,BRT),                  X00050000
+               INITIAL='CUSTOMER LOAN OVERVIEW             '            00060005
+CUSTLBL DFHMDF POS=(3,2),LENGTH=25,ATTRB=(PROT),                       X00070000
+               INITIAL='CUSTOMER ID        :'                           00080000
+CUSTID  DFHMDF POS=(3,30),LENGTH=5,ATTRB=(UNPROT),HILIGHT=UNDERLINE     00090002
+NAMELBL DFHMDF POS=(3,41),LENGTH=23,ATTRB=(PROT),                      X00100000
+               INITIAL='NAME               :'                           00110000
+NAMEIN  DFHMDF POS=(3,65),LENGTH=13,ATTRB=(UNPROT),HILIGHT=UNDERLINE    00120000
+        DFHMDF POS=(3,79),ATTRB=ASKIP,LENGTH=1                          00130000
+OCCLBL  DFHMDF POS=(4,2),LENGTH=25,ATTRB=(PROT),                       X00140000
+               INITIAL='OCC                :'                           00150000
+OCCU    DFHMDF POS=(4,30),LENGTH=10,ATTRB=(UNPROT),HILIGHT=UNDERLINE    00160000
+INCLBL  DFHMDF POS=(4,41),LENGTH=14,ATTRB=(PROT),                      X00170000
+               INITIAL='INCOME             :'                           00180000
+INCOME  DFHMDF POS=(4,57),LENGTH=10,ATTRB=(UNPROT),HILIGHT=UNDERLINE    00190000
+        DFHMDF POS=(4,69),LENGTH=4,INITIAL='RISK',ATTRB=ASKIP           00200000
+RISK    DFHMDF POS=(4,74),LENGTH=3,ATTRB=PROT,HILIGHT=UNDERLINE         00210000
+        DFHMDF POS=(4,78),LENGTH=2,ATTRB=ASKIP                          00220000
+LINE1   DFHMDF POS=(6,2),LENGTH=75,ATTRB=(PROT),                       X00230000
+               INITIAL='---------------- PRESS ENTER ----------------'  00240000
+L1LBL   DFHMDF POS=(7,2),LENGTH=25,ATTRB=(PROT),                       X00250000
+               INITIAL='LOAN ID 1          :'                           00260000
+L1ID    DFHMDF POS=(7,28),LENGTH=10,ATTRB=(PROT),HILIGHT=UNDERLINE      00270000
+L2LBL   DFHMDF POS=(7,40),LENGTH=24,ATTRB=(PROT),                      X00280000
+               INITIAL='LOAN ID 2          :'                           00290000
+L2ID    DFHMDF POS=(7,65),LENGTH=10,ATTRB=(PROT),HILIGHT=UNDERLINE      00300000
+        DFHMDF POS=(7,76),ATTRB=ASKIP,LENGTH=3                          00310000
+        DFHMDF POS=(8,2),LENGTH=25,ATTRB=ASKIP,                        X00320000
+               INITIAL='EDI1               :'                           00330000
+EDI1    DFHMDF POS=(8,28),LENGTH=10,ATTRB=PROT,HILIGHT=UNDERLINE        00340000
+        DFHMDF POS=(8,40),LENGTH=24,ATTRB=ASKIP,                       X00350000
+               INITIAL='EDI2               :'                           00360000
+EDI2    DFHMDF POS=(8,65),LENGTH=10,ATTRB=PROT,HILIGHT=UNDERLINE        00370000
+        DFHMDF POS=(8,77),LENGTH=3,ATTRB=ASKIP                          00380000
+ST1LBL  DFHMDF POS=(9,2),LENGTH=25,ATTRB=(PROT),                       X00390000
+               INITIAL='STATUS 1           :'                           00400000
+ST1     DFHMDF POS=(9,28),LENGTH=10,ATTRB=(PROT),HILIGHT=UNDERLINE      00410000
+ST2LBL  DFHMDF POS=(9,40),LENGTH=24,ATTRB=(PROT),                      X00420000
+               INITIAL='STATUS 2           :'                           00430000
+ST2     DFHMDF POS=(9,65),LENGTH=10,ATTRB=(PROT),HILIGHT=UNDERLINE      00440000
+        DFHMDF POS=(9,77),LENGTH=3,ATTRB=ASKIP                          00450000
+SD1LBL  DFHMDF POS=(10,2),LENGTH=25,ATTRB=(PROT),                      X00460000
+               INITIAL='START DATE 1       :'                           00470000
+SD1     DFHMDF POS=(10,28),LENGTH=10,ATTRB=(PROT),HILIGHT=UNDERLINE     00480000
+SD2LBL  DFHMDF POS=(10,40),LENGTH=24,ATTRB=(PROT),                     X00490000
+               INITIAL='START DATE 2       :'                           00500000
+SD2     DFHMDF POS=(10,65),LENGTH=10,ATTRB=(PROT),HILIGHT=UNDERLINE     00510000
+        DFHMDF POS=(10,77),LENGTH=3,ATTRB=ASKIP                         00520000
+ED1LBL  DFHMDF POS=(11,2),LENGTH=25,ATTRB=(PROT),                      X00530000
+               INITIAL='END DATE 1         :'                           00540000
+ED1     DFHMDF POS=(11,28),LENGTH=10,ATTRB=(PROT),HILIGHT=UNDERLINE     00550000
+ED2LBL  DFHMDF POS=(11,40),LENGTH=24,ATTRB=(PROT),                     X00560000
+               INITIAL='END DATE 2         :'                           00570000
+ED2     DFHMDF POS=(11,65),LENGTH=10,ATTRB=(PROT),HILIGHT=UNDERLINE     00580000
+        DFHMDF POS=(11,77),LENGTH=3,ATTRB=ASKIP                         00590000
+TEN1LBL DFHMDF POS=(12,2),LENGTH=25,ATTRB=(PROT),                      X00600000
+               INITIAL='TENURE 1           :'                           00610000
+TEN1    DFHMDF POS=(12,28),LENGTH=10,ATTRB=(PROT),HILIGHT=UNDERLINE     00620000
+TEN2LBL DFHMDF POS=(12,40),LENGTH=24,ATTRB=(PROT),                     X00630000
+               INITIAL='TENURE 2           :'                           00640000
+TEN2    DFHMDF POS=(12,65),LENGTH=10,ATTRB=(PROT),HILIGHT=UNDERLINE     00650000
+        DFHMDF POS=(12,77),LENGTH=3,ATTRB=ASKIP                         00660000
+OD1LBL  DFHMDF POS=(14,2),LENGTH=25,ATTRB=(PROT),                      X00670000
+               INITIAL='OVERDUE AMT 1      :'                           00680000
+OD1     DFHMDF POS=(14,28),LENGTH=10,ATTRB=(PROT),HILIGHT=UNDERLINE     00690000
+OD2LBL  DFHMDF POS=(14,40),LENGTH=24,ATTRB=(PROT),                     X00700000
+               INITIAL='OVERDUE AMT 2      :'                           00710000
+OD2     DFHMDF POS=(14,65),LENGTH=10,ATTRB=(PROT),HILIGHT=UNDERLINE     00720000
+        DFHMDF POS=(14,76),LENGTH=4,ATTRB=ASKIP                         00730000
+SAN1LBL DFHMDF POS=(15,2),LENGTH=25,ATTRB=(PROT),                      X00740000
+               INITIAL='SANCTION AMT 1     :'                           00750000
+SAN1    DFHMDF POS=(15,28),LENGTH=10,ATTRB=(PROT),HILIGHT=UNDERLINE     00760000
+SAN2LBL DFHMDF POS=(15,40),LENGTH=24,ATTRB=(PROT),                     X00770000
+               INITIAL='SANCTION AMT 2     :'                           00780000
+SAN2    DFHMDF POS=(15,65),LENGTH=10,ATTRB=(PROT),HILIGHT=UNDERLINE     00790000
+        DFHMDF POS=(15,76),LENGTH=4,ATTRB=ASKIP                         00800000
+ROI1LBL DFHMDF POS=(16,2),LENGTH=25,ATTRB=(PROT),                      X00810000
+               INITIAL='RATE OF INTEREST 1 :'                           00820000
+ROI1    DFHMDF POS=(16,28),LENGTH=10,ATTRB=(PROT),HILIGHT=UNDERLINE     00830000
+ROI2LBL DFHMDF POS=(16,40),LENGTH=24,ATTRB=(PROT),                     X00840000
+               INITIAL='RATE OF INTEREST 2 :'                           00850000
+ROI2    DFHMDF POS=(16,65),LENGTH=10,ATTRB=(PROT),HILIGHT=UNDERLINE     00860000
+        DFHMDF POS=(16,76),ATTRB=ASKIP,LENGTH=3                         00870000
+EDI1H   DFHMDF POS=(17,2),LENGTH=25,ATTRB=(PROT),                      X00880000
+               INITIAL='NO OF EDI1         :'                           00890000
+EDI1A   DFHMDF POS=(17,28),LENGTH=10,ATTRB=(PROT),HILIGHT=UNDERLINE     00900000
+EDI2H   DFHMDF POS=(17,41),LENGTH=23,ATTRB=(PROT),                     X00910000
+               INITIAL='NO OF EDI2         :'                           00920000
+EDI2A   DFHMDF POS=(17,65),LENGTH=10,ATTRB=(PROT),HILIGHT=UNDERLINE     00930000
+        DFHMDF POS=(17,76),LENGTH=3,ATTRB=ASKIP                         00940000
+PENAL1H DFHMDF POS=(18,2),LENGTH=25,ATTRB=(PROT),                      X00950000
+               INITIAL='PENALITY           :'                           00960000
+PENAL1  DFHMDF POS=(18,28),LENGTH=10,ATTRB=(PROT),HILIGHT=UNDERLINE     00970000
+PENAL2H DFHMDF POS=(18,40),LENGTH=24,ATTRB=(PROT),                     X00980000
+               INITIAL='PENALITY           :'                           00990000
+PENAL2  DFHMDF POS=(18,65),LENGTH=10,ATTRB=(PROT),HILIGHT=UNDERLINE     01000000
+        DFHMDF POS=(18,76),LENGTH=3,ATTRB=ASKIP                         01010000
+DUEDAYH DFHMDF POS=(19,2),LENGTH=25,ATTRB=(PROT),                      X01020000
+               INITIAL='DUE DAYS           :'                           01030000
+DUE1    DFHMDF POS=(19,28),LENGTH=10,ATTRB=(PROT),HILIGHT=UNDERLINE     01040000
+DUEDAY1 DFHMDF POS=(19,40),LENGTH=24,ATTRB=(PROT),                     X01050000
+               INITIAL='DUE DAYS           :'                           01060000
+DUE2    DFHMDF POS=(19,65),LENGTH=10,ATTRB=(PROT),HILIGHT=UNDERLINE     01070000
+        DFHMDF POS=(19,76),LENGTH=3,ATTRB=ASKIP                         01080000
+DUEAMTH DFHMDF POS=(20,2),LENGTH=25,ATTRB=(PROT),                      X01090000
+               INITIAL='DUE AMOUNT1        :'                           01100000
+DUEAMT1 DFHMDF POS=(20,28),LENGTH=10,ATTRB=(PROT),HILIGHT=UNDERLINE     01110000
+DUEAMT2 DFHMDF POS=(20,40),LENGTH=24,ATTRB=(PROT),                     X01120000
+               INITIAL='DUE AMOUNT2        :'                           01130000
+DUEAMTA DFHMDF POS=(20,65),LENGTH=10,ATTRB=(PROT),HILIGHT=UNDERLINE     01140000
+        DFHMDF POS=(20,76),LENGTH=3,ATTRB=ASKIP                         01150000
+FORCLOH DFHMDF POS=(21,2),LENGTH=25,ATTRB=(PROT),                      X01160000
+               INITIAL='FORECLOSURE AMT  1 :'                           01170000
+FORCL1  DFHMDF POS=(21,28),LENGTH=10,ATTRB=(PROT),HILIGHT=UNDERLINE     01180000
+FORCLO2 DFHMDF POS=(21,40),LENGTH=24,ATTRB=(PROT),                     X01190000
+               INITIAL='FORCLOSURE AMT   2 :'                           01200000
+FORCLA2 DFHMDF POS=(21,65),LENGTH=10,ATTRB=(PROT),HILIGHT=UNDERLINE     01210000
+        DFHMDF POS=(21,76),LENGTH=3,ATTRB=ASKIP                         01220000
+        DFHMDF POS=(22,2),INITIAL='PF3 = EXIT',LENGTH=10,ATTRB=ASKIP    01230000
+        DFHMDF POS=(22,14),INITIAL='PF5 = DEMOGRAPHIC DETAILS',        X01240000
+               LENGTH=20,ATTRB=ASKIP                                    01250000
+        DFHMDF POS=(22,62),INITIAL='PF9 = CLOSURE',LENGTH=14,          X01300000
+               ATTRB=ASKIP                                              01310000
+        DFHMDF POS=(23,10),INITIAL='CLOSURE YES/NO',LENGTH=15,         X01320000
+               ATTRB=PROT                                               01330000
+        DFHMDF POS=(23,28),LENGTH=3,ATTRB=PROT,HILIGHT=UNDERLINE        01340000
+        DFHMDF POS=(23,32),LENGTH=4,ATTRB=ASKIP                         01350000
+        DFHMSD TYPE=FINAL                                               01360000
+               END                                                      01370000
+

@@ -1,0 +1,85 @@
+CMPD    DFHMSD TYPE=&SYSPARM,MODE=INOUT,LANG=COBOL,STORAGE=AUTO,       X
+               CTRL=FREEKB,MAPATTS=(COLOR,HILIGHT)
+CMPD    DFHMDI SIZE=(24,80),LINE=1,COLUMN=1
+        DFHMDF POS=(1,2),LENGTH=5,ATTRB=(PROT),INITIAL='CMPD'
+*--------------------TITLE--------------------*
+        DFHMDF POS=(2,23),LENGTH=30,ATTRB=(PROT,BRT),                  X
+               INITIAL='CUSTOMER DEMOGRAPHIC DETAILS'
+*-------------------- NAME / AADHAAR -----------*
+        DFHMDF POS=(4,5),LENGTH=5,INITIAL='Name'
+        DFHMDF POS=(4,11),LENGTH=1,INITIAL=':'
+NAME1   DFHMDF POS=(4,13),LENGTH=25,ATTRB=PROT,HILIGHT=UNDERLINE
+        DFHMDF POS=(4,40),LENGTH=1,ATTRB=(ASKIP)
+        DFHMDF POS=(4,45),LENGTH=7,INITIAL='Aadhaar'
+        DFHMDF POS=(4,53),LENGTH=1,INITIAL=':'
+AADHAA  DFHMDF POS=(4,55),LENGTH=20,ATTRB=(UNPROT),HILIGHT=UNDERLINE
+        DFHMDF POS=(4,76),LENGTH=1,ATTRB=(ASKIP)
+*-------------------- DASHLINE----------------*
+        DFHMDF POS=(6,5),LENGTH=25,                                    X
+               INITIAL='--------------------------'
+        DFHMDF POS=(6,31),LENGTH=15,                                   X
+               INITIAL='(Press ENTER)'
+        DFHMDF POS=(6,47),LENGTH=30,                                   X
+               INITIAL='-----------------------------------'
+*--------------------STATUS-------------------*
+        DFHMDF POS=(8,5),LENGTH=11,INITIAL='STATUS    :'
+STATUS  DFHMDF POS=(8,18),LENGTH=20,ATTRB=PROT,HILIGHT=UNDERLINE
+        DFHMDF POS=(8,40),LENGTH=1,ATTRB=(ASKIP)
+*--------------------MESSAGE------------------*
+        DFHMDF POS=(10,5),LENGTH=11,INITIAL='MESSAGE   :'
+MESSAG  DFHMDF POS=(10,18),LENGTH=20,ATTRB=PROT,HILIGHT=UNDERLINE
+        DFHMDF POS=(10,40),LENGTH=1,ATTRB=(ASKIP)
+*-------------------- DOB / AGE ----------------*
+        DFHMDF POS=(12,5),LENGTH=11,INITIAL='DOB       :'
+DOB     DFHMDF POS=(12,17),LENGTH=10,ATTRB=PROT,HILIGHT=UNDERLINE
+        DFHMDF POS=(12,30),LENGTH=1,ATTRB=(ASKIP)
+        DFHMDF POS=(12,45),LENGTH=8,INITIAL='Age    :'
+AGE     DFHMDF POS=(12,54),LENGTH=7,ATTRB=PROT,HILIGHT=UNDERLINE
+        DFHMDF POS=(12,62),LENGTH=1,ATTRB=(ASKIP)
+*-------------------- GENDER / MOBILE ----------*
+        DFHMDF POS=(14,5),LENGTH=11,INITIAL='GENDER    :'
+GENDER  DFHMDF POS=(14,17),LENGTH=6,ATTRB=PROT,HILIGHT=UNDERLINE
+        DFHMDF POS=(14,24),LENGTH=1,ATTRB=(ASKIP)
+        DFHMDF POS=(14,45),LENGTH=6,INITIAL='Mobile'
+        DFHMDF POS=(14,52),LENGTH=1,INITIAL=':'
+MOBILE  DFHMDF POS=(14,54),LENGTH=12,ATTRB=PROT,HILIGHT=UNDERLINE
+        DFHMDF POS=(14,68),LENGTH=1,ATTRB=(ASKIP)
+*--------------------ADDRESS------------------*
+        DFHMDF POS=(15,5),LENGTH=11,INITIAL='ADDRESS1  :'
+ADDRE1  DFHMDF POS=(15,17),LENGTH=24,ATTRB=PROT,HILIGHT=UNDERLINE
+        DFHMDF POS=(15,42),LENGTH=1,ATTRB=(ASKIP)
+*-------------------- CITY / STATE / PIN -------*
+*-------------------- OCCUPATION / INCOME ------*
+        DFHMDF POS=(17,5),LENGTH=11,INITIAL='Occupation:'
+OCCUPA  DFHMDF POS=(17,18),LENGTH=20,ATTRB=(UNPROT),HILIGHT=UNDERLINE
+        DFHMDF POS=(17,40),LENGTH=1,ATTRB=(ASKIP)
+        DFHMDF POS=(17,45),LENGTH=15,INITIAL='Monthly Income:'
+MONTHI  DFHMDF POS=(17,62),LENGTH=6,ATTRB=(UNPROT),HILIGHT=UNDERLINE
+        DFHMDF POS=(17,69),LENGTH=1,ATTRB=(ASKIP)
+*--------------------LINE---------------------*
+        DFHMDF POS=(18,5),LENGTH=75,                                   X
+               INITIAL='-----------------------------------------------X--------
+                ------------------------'
+*-------------------- NOMINEE ------------------*
+        DFHMDF POS=(19,5),LENGTH=22,INITIAL='NOMINEE INFORMATION'
+        DFHMDF POS=(20,5),LENGTH=10,INITIAL='NAME     :'
+NAME2   DFHMDF POS=(20,17),LENGTH=27,ATTRB=(UNPROT),HILIGHT=UNDERLINE
+        DFHMDF POS=(20,46),LENGTH=12,INITIAL='RELATION   :'
+RELATI  DFHMDF POS=(20,59),LENGTH=13,ATTRB=(UNPROT),HILIGHT=UNDERLINE
+        DFHMDF POS=(20,73),LENGTH=1,ATTRB=(ASKIP)
+        DFHMDF POS=(21,5),LENGTH=10,INITIAL='MOBILE   :'
+MOBILE2 DFHMDF POS=(21,16),LENGTH=12,ATTRB=(UNPROT),HILIGHT=UNDERLINE
+        DFHMDF POS=(21,29),LENGTH=1,ATTRB=(ASKIP)
+        DFHMDF POS=(21,46),LENGTH=12,INITIAL='AADHAR     :'
+AADHAR2 DFHMDF POS=(21,59),LENGTH=15,ATTRB=(UNPROT),HILIGHT=UNDERLINE
+        DFHMDF POS=(21,76),LENGTH=1,ATTRB=(ASKIP)
+*--------------------LINE---------------------*
+        DFHMDF POS=(22,5),LENGTH=62,                                   X
+               INITIAL='---------------------------------------------- X--------
+               ------------------------------------------------'
+*--------------------PFKEYS------------------*
+        DFHMDF POS=(24,5),LENGTH=60,ATTRB=(PROT,BRT),                  X
+               INITIAL='           PF3=EXIT                       '
+        DFHMSD TYPE=FINAL
+               END
+

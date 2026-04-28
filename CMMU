@@ -1,0 +1,26 @@
+CMMU    DFHMSD TYPE=MAP,MODE=INOUT,LANG=COBOL,STORAGE=AUTO,            X00010003
+               TIOAPFX=YES,CTRL=FREEKB,DSATTS=(COLOR,HILIGHT),         X00020000
+               MAPATTS=(COLOR,HILIGHT)                                  00030000
+CMMU    DFHMDI SIZE=(24,80),LINE=1,COLUMN=1                             00040003
+        DFHMDF POS=(1,2),LENGTH=5,ATTRB=(PROT),INITIAL='CMMU'           00041006
+        DFHMDF POS=(2,25),LENGTH=30,ATTRB=(PROT,BRT),                  X00050000
+               INITIAL='CUSTOMER MENU SCREEN'                           00060000
+        DFHMDF POS=(5,20),LENGTH=40,ATTRB=(PROT),                      X00070000
+               INITIAL='1. VIEW ACCOUNT DETAILS'                        00080004
+        DFHMDF POS=(7,20),LENGTH=40,ATTRB=(PROT),                      X00090000
+               INITIAL='2. MAKE ONLINE PAYMENT'                         00100004
+        DFHMDF POS=(9,20),LENGTH=40,ATTRB=(PROT),                      X00110000
+               INITIAL='3. CHECK PAYMENT HISTORY'                       00120004
+        DFHMDF POS=(11,20),LENGTH=40,ATTRB=(PROT),                     X00130000
+               INITIAL='4. RAISE A DISPUTE'                             00140004
+        DFHMDF POS=(13,20),LENGTH=40,ATTRB=(PROT),                     X00150000
+               INITIAL='5. PASSWORD CHANGE / UPDATE'                    00160004
+        DFHMDF POS=(16,20),LENGTH=15,ATTRB=(PROT),                     X00170000
+               INITIAL='ENTER OPTION :'                                 00180000
+OPTION  DFHMDF POS=(16,38),LENGTH=1,ATTRB=(UNPROT,IC)                   00190005
+        DFHMDF POS=(16,40),LENGTH=10,ATTRB=ASKIP                        00200005
+        DFHMDF POS=(20,5),LENGTH=60,ATTRB=(PROT),                      X00210000
+               INITIAL='ENTER=SELECT  PF3=EXIT  '                       00220005
+        DFHMSD TYPE=FINAL                                               00230000
+               END                                                      00240000
+

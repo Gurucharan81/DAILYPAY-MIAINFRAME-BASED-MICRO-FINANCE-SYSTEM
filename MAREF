@@ -1,0 +1,65 @@
+MAREF   DFHMSD TYPE=MAP,MODE=INOUT,LANG=COBOL,STORAGE=AUTO,            X00010001
+               TIOAPFX=YES,CTRL=FREEKB,DSATTS=(COLOR,HILIGHT),         X00020000
+               MAPATTS=(COLOR,HILIGHT)                                  00030000
+MAREF   DFHMDI SIZE=(24,80),LINE=1,COLUMN=1                             00040001
+        DFHMDF POS=(1,2),LENGTH=5,ATTRB=(PROT),INITIAL='MAREF'          00041012
+TITLE   DFHMDF POS=(2,25),LENGTH=20,ATTRB=(PROT,BRT),                  X00050000
+               INITIAL='REFUND SCREEN'                                  00060000
+PSETUP  DFHMDF POS=(4,2),LENGTH=12,ATTRB=(PROT),INITIAL='PAYMENT PAGE'  00070002
+BNLBL   DFHMDF POS=(4,16),LENGTH=12,ATTRB=(PROT),INITIAL='DAILY PAY'    00080012
+        DFHMDF POS=(4,29),LENGTH=1,ATTRB=ASKIP                          00100004
+DATELBL DFHMDF POS=(4,60),LENGTH=5,ATTRB=(PROT),INITIAL='DATE:'         00110005
+DATEIN  DFHMDF POS=(4,66),LENGTH=10,ATTRB=(PROT),HILIGHT=UNDERLINE      00120007
+        DFHMDF POS=(4,77),LENGTH=5,ATTRB=ASKIP                          00130006
+CIDLBL  DFHMDF POS=(6,2),LENGTH=15,ATTRB=(PROT),                       X00140004
+               INITIAL='CUSTOMER ID   :'                                00150004
+CIDIN   DFHMDF POS=(6,18),LENGTH=5,ATTRB=PROT,HILIGHT=UNDERLINE         00160007
+        DFHMDF POS=(6,34),LENGTH=7,ATTRB=ASKIP                          00170004
+LOANLBL DFHMDF POS=(6,51),LENGTH=15,ATTRB=(PROT),                      X00180004
+               INITIAL='LOAN A/C NO   :'                                00190004
+LOANIN  DFHMDF POS=(6,67),LENGTH=6,ATTRB=(PROT,NUM),HILIGHT=UNDERLINE   00200008
+        DFHMDF POS=(6,74),LENGTH=1,ATTRB=ASKIP                          00210004
+NAMELBL DFHMDF POS=(7,2),LENGTH=15,ATTRB=(PROT),                       X00220004
+               INITIAL='CUSTOMER NAME :'                                00230004
+NAMEIN  DFHMDF POS=(7,18),LENGTH=20,ATTRB=(UNPROT),HILIGHT=UNDERLINE    00240009
+AMTLBL  DFHMDF POS=(7,51),LENGTH=15,ATTRB=(PROT),                      X00250004
+               INITIAL='AMOUNT        :'                                00260004
+AMTIN   DFHMDF POS=(7,67),LENGTH=5,                                    X00270009
+               ATTRB=(UNPROT,NUM,IC),HILIGHT=UNDERLINE                  00271009
+        DFHMDF POS=(7,73),LENGTH=4,ATTRB=ASKIP                          00280004
+PMODE   DFHMDF POS=(9,2),LENGTH=15,ATTRB=(PROT),                       X00290004
+               INITIAL='PAYMENT MODE  :'                                00300004
+PMODEIN DFHMDF POS=(9,18),LENGTH=1,ATTRB=(UNPROT),HILIGHT=UNDERLINE     00310004
+        DFHMDF POS=(9,20),LENGTH=5,ATTRB=ASKIP                          00320004
+PAYDTLB DFHMDF POS=(9,51),LENGTH=15,ATTRB=(PROT),                      X00330004
+               INITIAL='PAYMENT DATE  :'                                00340004
+PAYDTIN DFHMDF POS=(9,67),LENGTH=10,ATTRB=(UNPROT),HILIGHT=UNDERLINE    00350004
+        DFHMDF POS=(9,78),LENGTH=1,ATTRB=ASKIP                          00360004
+BANKOPT DFHMDF POS=(10,30),LENGTH=10,ATTRB=(PROT),                     X00370004
+               INITIAL='1. BANK  '                                      00380004
+CASHOPT DFHMDF POS=(11,30),LENGTH=10,ATTRB=(PROT),                     X00390004
+               INITIAL='2. CASH  '                                      00400004
+BANKLBL DFHMDF POS=(13,2),LENGTH=15,ATTRB=(PROT),                      X00410004
+               INITIAL='BANK NAME     :'                                00420004
+BANKIN  DFHMDF POS=(13,18),LENGTH=20,ATTRB=(UNPROT),HILIGHT=UNDERLINE   00430004
+        DFHMDF POS=(13,39),LENGTH=5,ATTRB=ASKIP                         00440004
+ACCLBL  DFHMDF POS=(14,2),LENGTH=15,ATTRB=(PROT),                      X00450004
+               INITIAL='A/C NO        :'                                00460004
+ACCIN   DFHMDF POS=(14,18),LENGTH=10,ATTRB=(UNPROT),HILIGHT=UNDERLINE   00470004
+        DFHMDF POS=(14,29),LENGTH=5,ATTRB=ASKIP                         00480004
+AGENTLB DFHMDF POS=(15,2),LENGTH=15,ATTRB=(PROT),                      X00490004
+               INITIAL='AGENT ID      :'                                00500004
+AGENTIN DFHMDF POS=(15,18),LENGTH=10,ATTRB=(UNPROT),HILIGHT=UNDERLINE   00510004
+AGNOTE  DFHMDF POS=(15,29),LENGTH=15,ATTRB=(PROT),                     X00520004
+               INITIAL='(TO BE ASSIGN.)'                                00530000
+SMSLBL  DFHMDF POS=(17,2),LENGTH=15,ATTRB=(PROT),                      X00540004
+               INITIAL='SMS           :'                                00550004
+SMSIN1  DFHMDF POS=(17,18),LENGTH=25,ATTRB=(UNPROT),HILIGHT=UNDERLINE   00560010
+SMSIN   DFHMDF POS=(17,44),LENGTH=1,ATTRB=ASKIP                         00570010
+ENTERMS DFHMDF POS=(20,25),LENGTH=15,ATTRB=(PROT,BRT),                 X00580000
+               INITIAL='[ PRESS ENTER ]'                                00590000
+        DFHMDF POS=(24,20),LENGTH=40,ATTRB=(PROT,BRT),                 X00591011
+               INITIAL='PRESS PF3 -- GO TO DISPUTE SCREEN'              00592010
+        DFHMSD TYPE=FINAL                                               00600000
+                END                                                     00610000
+

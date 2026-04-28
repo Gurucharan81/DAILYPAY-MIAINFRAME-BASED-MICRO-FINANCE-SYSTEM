@@ -1,0 +1,149 @@
+       ID DIVISION.
+       PROGRAM-ID. PLOGN.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       COPY DLGN.
+      *COPY CMMU.
+      *COPY MADB.
+       01 RES         PIC S9(8) COMP.
+       01 WS-COMMAREA PIC X(10).
+       01 WS-USERID   PIC X(5).
+       01 WS-PASSWORD PIC X(5).
+       01 WS-ROLE     PIC X.
+       01 CUST-REC.
+          05 C-ID     PIC X(5).
+          05 C-PASS   PIC X(5).
+          05 C-ROLE   PIC X.
+          05 FILLER   PIC X(19).
+       01 CO-REC.
+          05 CO-SCREEN PIC X.
+          05 CO-CUSTID PIC 9(5).
+       LINKAGE SECTION.
+       01 DFHCOMMAREA.
+           05 CA-CUST-ID  PIC 9(5).
+       PROCEDURE DIVISION.
+           IF EIBCALEN = 0
+              MOVE LOW-VALUES TO DLGNO
+              EXEC CICS SEND
+                MAP('DLGN')
+                MAPSET('DLGN')
+                FREEKB
+                FROM(DLGNO)
+                ERASE
+              END-EXEC
+
+              EXEC CICS RETURN
+                TRANSID('TLGN')
+                COMMAREA(WS-COMMAREA)
+              END-EXEC
+           ELSE
+              EXEC CICS RECEIVE
+                MAP('DLGN')
+                MAPSET('DLGN')
+                INTO(DLGNI)
+              END-EXEC
+           END-IF.
+           MOVE CUSTIDI TO WS-USERID
+           MOVE PASSI   TO WS-PASSWORD
+           MOVE ROLEI   TO WS-ROLE
+           IF WS-USERID = SPACES OR
+              WS-PASSWORD = SPACES OR
+              WS-ROLE = SPACES
+              MOVE 'ENTER ALL FIELDS' TO MSGO
+              EXEC CICS SEND
+                MAP('DLGN')
+                MAPSET('DLGN')
+                FREEKB
+                FROM(DLGNO)
+              END-EXEC
+              EXEC CICS RETURN
+                TRANSID('TLGN')
+                COMMAREA(WS-COMMAREA)
+              END-EXEC
+           ELSE
+              PERFORM READ-VSAM
+           END-IF.
+       READ-VSAM.
+           MOVE WS-USERID TO C-ID
+           EXEC CICS READ
+              FILE('LOGINFL')
+              INTO(CUST-REC)
+              RIDFLD(C-ID)
+              RESP(RES)
+           END-EXEC
+           IF RES NOT = DFHRESP(NORMAL)
+              MOVE 'CUST NOT FOUND' TO MSGO
+              EXEC CICS SEND
+                MAP('DLGN')
+                MAPSET('DLGN')
+                FREEKB
+                FROM(DLGNO)
+              END-EXEC
+              EXEC CICS RETURN
+                TRANSID('TLGN')
+                COMMAREA(WS-COMMAREA)
+              END-EXEC
+           ELSE
+              IF WS-PASSWORD = C-PASS
+                 IF WS-ROLE = C-ROLE
+                   MOVE 'LOGIN SUCCESS' TO MSGO
+                     EXEC CICS SEND
+                       MAP('DLGN')
+                       MAPSET('DLGN')
+                       FREEKB
+                       FROM(DLGNO)
+                     END-EXEC
+                   IF WS-ROLE = 'M'
+                     MOVE 'X' TO CO-SCREEN
+                     MOVE CUSTIDI TO CO-CUSTID
+                     EXEC CICS XCTL  PROGRAM('PMADB')
+                     END-EXEC
+
+      *                   COMMAREA(CO-REC)
+      *                   LENGTH(LENGTH OF CO-REC)
+                   ELSE IF WS-ROLE = 'A'
+                     MOVE 'X' TO CO-SCREEN
+                     MOVE CUSTIDI TO CO-CUSTID
+                     EXEC CICS XCTL  PROGRAM('PAGMU')
+                     END-EXEC
+
+      *                   COMMAREA(CO-REC)
+      *                   LENGTH(LENGTH OF CO-REC)
+                   ELSE IF WS-ROLE = 'C'
+                     MOVE 'X' TO CO-SCREEN
+                     MOVE CUSTIDI TO CO-CUSTID
+                     MOVE CUSTIDI TO CA-CUST-ID
+                     EXEC CICS XCTL
+                         PROGRAM('PCMMU')
+                          COMMAREA(CO-REC)
+                          LENGTH(LENGTH OF CO-REC)
+                     END-EXEC
+                   END-IF
+                 ELSE
+                   MOVE 'ROLE MISMATCH' TO MSGO
+                     EXEC CICS SEND
+                       MAP('DLGN')
+                       MAPSET('DLGN')
+                       FREEKB
+                       FROM(DLGNO)
+                     END-EXEC
+                     EXEC CICS RETURN
+                       TRANSID('TLGN')
+                       COMMAREA(WS-COMMAREA)
+                     END-EXEC
+                 END-IF
+              ELSE
+                  MOVE 'INVALID PASSWORD' TO MSGO
+                    EXEC CICS SEND
+                       MAP('DLGN')
+                       MAPSET('DLGN')
+                       FREEKB
+                       FROM(DLGNO)
+                    END-EXEC
+                    EXEC CICS RETURN
+                      TRANSID('TLGN')
+                      COMMAREA(WS-COMMAREA)
+                    END-EXEC
+              END-IF
+           END-IF.
+

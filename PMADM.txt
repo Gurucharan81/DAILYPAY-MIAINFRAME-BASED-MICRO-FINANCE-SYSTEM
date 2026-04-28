@@ -1,0 +1,462 @@
+       ID DIVISION.
+       PROGRAM-ID. PMADM.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       COPY MADM.
+       COPY DFHAID.
+
+      *--------------------------------------------
+      * GENERAL
+      *--------------------------------------------
+       01 WS-CHOICE      PIC X(1).
+       01 WS-LOANID      PIC X(6).
+       01 WS-RESP        PIC S9(8) COMP.
+       01 WS-END-FLAG    PIC X VALUE 'N'.
+       01 WS-INDEX       PIC S9(4) COMP.
+
+      *--------------------------------------------
+      * SEARCH FLAGS
+      *--------------------------------------------
+       01 WS-LOAN-FOUND  PIC X VALUE 'N'.
+       01 WS-FOUND-FLAG  PIC X VALUE 'N'.
+
+      *--------------------------------------------
+      * PAGING KEYS
+      *--------------------------------------------
+       01 WS-START-KEY   PIC X(11).
+       01 WS-FIRST-KEY   PIC X(11).
+       01 WS-LAST-KEY    PIC X(11).
+       01 WS-DIRECTION   PIC X VALUE 'F'.
+
+      *--------------------------------------------
+      * COMMAREA
+      *--------------------------------------------
+       01 WS-COMMAREA.
+          05 WS-CM-LOANID PIC X(6).
+          05 WS-CM-CUSTID PIC X(5).
+          05 WS-CM-DATE   PIC X(10).
+          05 FILLER       PIC X(79).
+
+      *--------------------------------------------
+      * VSAM DISPUTE RECORD
+      *--------------------------------------------
+       01 DISPUTE-REC.
+          05 DISPUTE-ID   PIC X(11).
+          05 CUST-ID      PIC X(5).
+          05 LOAN-ID      PIC X(6).
+          05 DATE1        PIC X(10).
+          05 D-AMT        PIC 9(6).
+          05 D-TYPE       PIC 9.
+          05 RESPONSE     PIC X(20).
+          05 REST         PIC X(21).
+
+      *--------------------------------------------
+      * SCREEN TABLE - 7 ROWS
+      *--------------------------------------------
+       01 WS-TABLE.
+          05 WS-REC OCCURS 7 TIMES.
+             10 WS-DISPUTE-ID PIC X(11).
+             10 WS-CUST-ID    PIC X(5).
+             10 WS-LOAN-ID    PIC X(6).
+             10 WS-DATE1      PIC X(10).
+             10 WS-D-AMT      PIC 9(6).
+             10 WS-D-TYPE     PIC 9.
+             10 WS-RESPONSE   PIC X(2).
+             10 WS-ACTUAL-AMT PIC 9(6).
+             10 WS-BANK-ACC   PIC X(10).
+
+       LINKAGE SECTION.
+       01 DFHCOMMAREA PIC X(100).
+
+      *==============================================
+       PROCEDURE DIVISION.
+      *==============================================
+
+       MAIN-LOGIC.
+
+           MOVE LOW-VALUES TO MADMO
+
+           IF EIBCALEN = 0
+               MOVE LOW-VALUES  TO WS-START-KEY
+               MOVE SPACES      TO WS-COMMAREA
+               MOVE 'F'         TO WS-DIRECTION
+
+               PERFORM READ-PARA
+               PERFORM MOVE-PARA
+               PERFORM SEND-PARA
+
+               EXEC CICS RETURN
+                    TRANSID('TMDM')
+                    COMMAREA(WS-COMMAREA)
+                    LENGTH(100)
+               END-EXEC
+
+           ELSE
+               MOVE DFHCOMMAREA TO WS-COMMAREA
+
+               PERFORM RECEIVE-PARA
+
+               EVALUATE EIBAID
+
+                  WHEN DFHPF3
+                       EXEC CICS XCTL
+                            PROGRAM('PMADB')
+                       END-EXEC
+
+                  WHEN DFHPF8
+                       MOVE WS-LAST-KEY  TO WS-START-KEY
+                       MOVE 'F'          TO WS-DIRECTION
+                       PERFORM READ-PARA
+                       PERFORM MOVE-PARA
+                       PERFORM SEND-PARA
+                       EXEC CICS RETURN
+                            TRANSID('TMDM')
+                            COMMAREA(WS-COMMAREA)
+                            LENGTH(100)
+                       END-EXEC
+
+                  WHEN DFHPF7
+                       MOVE WS-FIRST-KEY TO WS-START-KEY
+                       MOVE 'B'          TO WS-DIRECTION
+                       PERFORM READ-PARA
+                       PERFORM MOVE-PARA
+                       PERFORM SEND-PARA
+                       EXEC CICS RETURN
+                            TRANSID('TMDM')
+                            COMMAREA(WS-COMMAREA)
+                            LENGTH(100)
+                       END-EXEC
+
+                  WHEN DFHENTER
+                       PERFORM PROCESS-PARA
+
+                  WHEN OTHER
+                       CONTINUE
+
+               END-EVALUATE
+           END-IF.
+
+      *--------------------------------------------
+      * READ-PARA
+      * BROWSE DISPFL FILE - MAX 7 RECORDS
+      * DIRECTION F=FORWARD B=BACKWARD
+      *--------------------------------------------
+       READ-PARA.
+
+           MOVE SPACES TO WS-TABLE
+           MOVE 'N'    TO WS-END-FLAG
+           MOVE 1      TO WS-INDEX
+
+           EXEC CICS STARTBR
+                FILE('DISPFL')
+                RIDFLD(WS-START-KEY)
+                GTEQ
+                RESP(WS-RESP)
+           END-EXEC
+
+           IF WS-RESP NOT = DFHRESP(NORMAL)
+               MOVE 'FILE BROWSE ERROR' TO MSGINO
+               PERFORM SEND-PARA
+               EXEC CICS RETURN
+                    TRANSID('TMDM')
+                    COMMAREA(WS-COMMAREA)
+                    LENGTH(100)
+               END-EXEC
+           END-IF
+
+           PERFORM UNTIL WS-INDEX > 7
+                      OR WS-END-FLAG = 'Y'
+
+               IF WS-DIRECTION = 'F'
+                   EXEC CICS READNEXT
+                        FILE('DISPFL')
+                        INTO(DISPUTE-REC)
+                        RIDFLD(DISPUTE-ID)
+                        RESP(WS-RESP)
+                   END-EXEC
+               ELSE
+                   EXEC CICS READPREV
+                        FILE('DISPFL')
+                        INTO(DISPUTE-REC)
+                        RIDFLD(DISPUTE-ID)
+                        RESP(WS-RESP)
+                   END-EXEC
+               END-IF
+
+               IF WS-RESP = DFHRESP(NORMAL)
+
+                   IF WS-INDEX = 1
+                       MOVE DISPUTE-ID TO WS-FIRST-KEY
+                   END-IF
+
+                   MOVE DISPUTE-ID      TO WS-LAST-KEY
+                   MOVE DISPUTE-ID      TO WS-DISPUTE-ID(WS-INDEX)
+                   MOVE CUST-ID         TO WS-CUST-ID(WS-INDEX)
+                   MOVE LOAN-ID         TO WS-LOAN-ID(WS-INDEX)
+                   MOVE DATE1           TO WS-DATE1(WS-INDEX)
+                   MOVE D-AMT           TO WS-D-AMT(WS-INDEX)
+                   MOVE D-TYPE          TO WS-D-TYPE(WS-INDEX)
+                   MOVE RESPONSE(1:2)   TO WS-RESPONSE(WS-INDEX)
+                   MOVE RESPONSE(3:6)   TO WS-ACTUAL-AMT(WS-INDEX)
+                   MOVE RESPONSE(9:10)  TO WS-BANK-ACC(WS-INDEX)
+
+                   ADD 1 TO WS-INDEX
+
+               ELSE
+                   MOVE 'Y' TO WS-END-FLAG
+               END-IF
+
+           END-PERFORM
+
+           EXEC CICS ENDBR
+                FILE('DISPFL')
+           END-EXEC.
+
+      *--------------------------------------------
+      * MOVE-PARA
+      * MOVE TABLE DATA TO MAP OUTPUT FIELDS
+      *--------------------------------------------
+       MOVE-PARA.
+
+           MOVE WS-DISPUTE-ID(1)  TO DID1O
+           MOVE WS-CUST-ID(1)     TO CID1O
+           MOVE WS-LOAN-ID(1)     TO LID1O
+           MOVE WS-DATE1(1)       TO DT1O
+           MOVE WS-D-AMT(1)       TO DA1O
+           MOVE WS-D-TYPE(1)      TO DTY1O
+           MOVE WS-RESPONSE(1)    TO RSP1O
+           MOVE WS-ACTUAL-AMT(1)  TO AMT1O
+           MOVE WS-BANK-ACC(1)    TO BAC1O
+
+           MOVE WS-DISPUTE-ID(2)  TO DID2O
+           MOVE WS-CUST-ID(2)     TO CID2O
+           MOVE WS-LOAN-ID(2)     TO LID2O
+           MOVE WS-DATE1(2)       TO DT2O
+           MOVE WS-D-AMT(2)       TO DA2O
+           MOVE WS-D-TYPE(2)      TO DTY2O
+           MOVE WS-RESPONSE(2)    TO RSP2O
+           MOVE WS-ACTUAL-AMT(2)  TO AMT2O
+           MOVE WS-BANK-ACC(2)    TO BAC2O
+
+           MOVE WS-DISPUTE-ID(3)  TO DID3O
+           MOVE WS-CUST-ID(3)     TO CID3O
+           MOVE WS-LOAN-ID(3)     TO LID3O
+           MOVE WS-DATE1(3)       TO DT3O
+           MOVE WS-D-AMT(3)       TO DA3O
+           MOVE WS-D-TYPE(3)      TO DTY3O
+           MOVE WS-RESPONSE(3)    TO RSP3O
+           MOVE WS-ACTUAL-AMT(3)  TO AMT3O
+           MOVE WS-BANK-ACC(3)    TO BAC3O
+
+           MOVE WS-DISPUTE-ID(4)  TO DID4O
+           MOVE WS-CUST-ID(4)     TO CID4O
+           MOVE WS-LOAN-ID(4)     TO LID4O
+           MOVE WS-DATE1(4)       TO DT4O
+           MOVE WS-D-AMT(4)       TO DA4O
+           MOVE WS-D-TYPE(4)      TO DTY4O
+           MOVE WS-RESPONSE(4)    TO RSP4O
+           MOVE WS-ACTUAL-AMT(4)  TO AMT4O
+           MOVE WS-BANK-ACC(4)    TO BAC4O
+
+           MOVE WS-DISPUTE-ID(5)  TO DID5O
+           MOVE WS-CUST-ID(5)     TO CID5O
+           MOVE WS-LOAN-ID(5)     TO LID5O
+           MOVE WS-DATE1(5)       TO DT5O
+           MOVE WS-D-AMT(5)       TO DA5O
+           MOVE WS-D-TYPE(5)      TO DTY5O
+           MOVE WS-RESPONSE(5)    TO RSP5O
+           MOVE WS-ACTUAL-AMT(5)  TO AMT5O
+           MOVE WS-BANK-ACC(5)    TO BAC5O
+
+           MOVE WS-DISPUTE-ID(6)  TO DID6O
+           MOVE WS-CUST-ID(6)     TO CID6O
+           MOVE WS-LOAN-ID(6)     TO LID6O
+           MOVE WS-DATE1(6)       TO DT6O
+           MOVE WS-D-AMT(6)       TO DA6O
+           MOVE WS-D-TYPE(6)      TO DTY6O
+           MOVE WS-RESPONSE(6)    TO RSP6O
+           MOVE WS-ACTUAL-AMT(6)  TO AMT6O
+           MOVE WS-BANK-ACC(6)    TO BAC6O
+
+           MOVE WS-DISPUTE-ID(7)  TO DID7O
+           MOVE WS-CUST-ID(7)     TO CID7O
+           MOVE WS-LOAN-ID(7)     TO LID7O
+           MOVE WS-DATE1(7)       TO DT7O
+           MOVE WS-D-AMT(7)       TO DA7O
+           MOVE WS-D-TYPE(7)      TO DTY7O
+           MOVE WS-RESPONSE(7)    TO RSP7O
+           MOVE WS-ACTUAL-AMT(7)  TO AMT7O
+           MOVE WS-BANK-ACC(7)    TO BAC7O.
+
+      *--------------------------------------------
+      * SEND-PARA
+      * SEND MAP TO TERMINAL
+      *--------------------------------------------
+       SEND-PARA.
+
+           EXEC CICS SEND
+                MAP('MADM')
+                MAPSET('MADM')
+                FROM(MADMO)
+                ERASE
+                FREEKB
+           END-EXEC.
+
+      *--------------------------------------------
+      * RECEIVE-PARA
+      * RECEIVE USER INPUT FROM SCREEN
+      *--------------------------------------------
+       RECEIVE-PARA.
+
+           EXEC CICS RECEIVE
+                MAP('MADM')
+                MAPSET('MADM')
+                RESP(WS-RESP)
+           END-EXEC
+
+           IF WS-RESP = DFHRESP(MAPFAIL)
+               MOVE SPACES TO WS-CHOICE
+               MOVE SPACES TO WS-LOANID
+           ELSE
+               MOVE CHOICEI TO WS-CHOICE
+               MOVE LOANINI TO WS-LOANID
+           END-IF.
+
+      *--------------------------------------------
+      * PROCESS-PARA
+      * VALIDATE LOAN ID AGAINST FULL DISPFL FILE
+      * THEN NAVIGATE BASED ON CHOICE
+      *--------------------------------------------
+       PROCESS-PARA.
+
+           MOVE 'N'      TO WS-LOAN-FOUND
+           MOVE 'N'      TO WS-FOUND-FLAG
+           MOVE 'N'      TO WS-END-FLAG
+           MOVE SPACES   TO WS-COMMAREA
+
+      *--- VALIDATE LOANID NOT BLANK ---
+           IF WS-LOANID = SPACES
+               MOVE 'ENTER LOAN ID'      TO MSGINO
+               PERFORM SEND-PARA
+               EXEC CICS RETURN
+                    TRANSID('TMDM')
+                    COMMAREA(WS-COMMAREA)
+                    LENGTH(100)
+               END-EXEC
+           END-IF
+
+      *--- VALIDATE CHOICE NOT BLANK ---
+           IF WS-CHOICE = SPACES
+               MOVE 'ENTER CHOICE'       TO MSGINO
+               PERFORM SEND-PARA
+               EXEC CICS RETURN
+                    TRANSID('TMDM')
+                    COMMAREA(WS-COMMAREA)
+                    LENGTH(100)
+               END-EXEC
+           END-IF
+
+      *--- BROWSE ENTIRE DISPFL FILE ---
+           MOVE LOW-VALUES TO DISPUTE-ID
+
+           EXEC CICS STARTBR
+                FILE('DISPFL')
+                RIDFLD(DISPUTE-ID)
+                GTEQ
+                RESP(WS-RESP)
+           END-EXEC
+
+           IF WS-RESP NOT = DFHRESP(NORMAL)
+               MOVE 'FILE ERROR'         TO MSGINO
+               PERFORM SEND-PARA
+               EXEC CICS RETURN
+                    TRANSID('TMDM')
+                    COMMAREA(WS-COMMAREA)
+                    LENGTH(100)
+               END-EXEC
+           END-IF
+
+      *--- SEARCH LOOP ---
+           PERFORM UNTIL WS-END-FLAG = 'Y'
+
+               EXEC CICS READNEXT
+                    FILE('DISPFL')
+                    INTO(DISPUTE-REC)
+                    RIDFLD(DISPUTE-ID)
+                    RESP(WS-RESP)
+               END-EXEC
+
+               IF WS-RESP NOT = DFHRESP(NORMAL)
+                   MOVE 'Y' TO WS-END-FLAG
+
+               ELSE
+                   IF LOAN-ID = WS-LOANID
+                       MOVE 'Y' TO WS-LOAN-FOUND
+
+                       IF RESPONSE(1:2) = ' Y'
+                           MOVE 'Y'      TO WS-FOUND-FLAG
+                           MOVE 'Y'      TO WS-END-FLAG
+                           MOVE LOAN-ID  TO WS-CM-LOANID
+                           MOVE CUST-ID  TO WS-CM-CUSTID
+                           MOVE DATE1    TO WS-CM-DATE
+                       END-IF
+                   END-IF
+               END-IF
+
+           END-PERFORM
+
+           EXEC CICS ENDBR
+                FILE('DISPFL')
+           END-EXEC
+
+      *--- CHECK LOAN FOUND ---
+           IF WS-LOAN-FOUND = 'N'
+               MOVE 'LOAN ID NOT FOUND'  TO MSGINO
+               PERFORM SEND-PARA
+               EXEC CICS RETURN
+                    TRANSID('TMDM')
+                    COMMAREA(WS-COMMAREA)
+                    LENGTH(100)
+               END-EXEC
+           END-IF
+
+      *--- CHECK RESPONSE = Y ---
+           IF WS-FOUND-FLAG = 'N'
+               MOVE 'RESPONSE NOT Y'     TO MSGINO
+               PERFORM SEND-PARA
+               EXEC CICS RETURN
+                    TRANSID('TMDM')
+                    COMMAREA(WS-COMMAREA)
+                    LENGTH(100)
+               END-EXEC
+           END-IF
+
+      *--- NAVIGATE BASED ON CHOICE ---
+           EVALUATE WS-CHOICE
+
+               WHEN '1'
+                   EXEC CICS XCTL
+                        PROGRAM('PMAREF')
+                        COMMAREA(WS-COMMAREA)
+                        LENGTH(100)
+                   END-EXEC
+
+               WHEN '2'
+                   EXEC CICS XCTL
+                        PROGRAM('PMARS')
+                        COMMAREA(WS-COMMAREA)
+                        LENGTH(100)
+                   END-EXEC
+
+               WHEN OTHER
+                   MOVE 'INVALID OPTION' TO MSGINO
+                   PERFORM SEND-PARA
+                   EXEC CICS RETURN
+                        TRANSID('TMDM')
+                        COMMAREA(WS-COMMAREA)
+                        LENGTH(100)
+                   END-EXEC
+
+           END-EVALUATE.
+

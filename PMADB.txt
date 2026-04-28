@@ -1,0 +1,141 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. PMADB.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 WS-CHOICE      PIC X.
+       01 WS-RESP        PIC S9(8) COMP.
+       01 WS-COMMAREA    PIC X(100).
+       01 WS-ABSTIME     PIC S9(15) COMP-3.
+       01 WS-MSG         PIC X(50).
+
+       01 WS-DATE-RAW    PIC X(8).
+       01 WS-DATE-FMT    PIC X(10).
+       01 WS-SCREEN      PIC X.
+       01 WS-TIME-RAW    PIC X(6).
+       01 WS-TIME-FMT    PIC X(8).
+       01 DASH-REC.
+          05 SNO         PIC X(3).
+          05 ACTIVE-LNS  PIC X(3).
+          05 TOD-COLLN   PIC 9(8).
+          05 OVERDUE-ACC PIC 9(3).
+          05 DISPUTES    PIC X(3).
+          05 NEWUSERS    PIC X(3).
+          05 CLOSED      PIC X(3).
+          05 DUST        PIC X(74).
+       COPY MADB.
+       COPY DFHAID.
+       LINKAGE SECTION.
+       01 DFHCOMMAREA.
+          05 CA-SCREEN PIC X.
+          05 CA-MASTERID PIC 9(5).
+       PROCEDURE DIVISION.
+           IF EIBCALEN = 0
+               PERFORM INITIAL-SCREEN
+           ELSE
+               IF CA-SCREEN = 'X'
+                    MOVE 'Y' TO CA-SCREEN
+                    PERFORM INITIAL-SCREEN
+               ELSE
+                    PERFORM PROCESS-INPUT
+           END-IF
+           EXEC CICS RETURN
+                TRANSID('TMDB')
+                COMMAREA(WS-COMMAREA)
+           END-EXEC.
+       INITIAL-SCREEN.
+           MOVE LOW-VALUES TO MADBO
+           EXEC CICS ASKTIME
+                ABSTIME(WS-ABSTIME)
+           END-EXEC.
+           EXEC CICS FORMATTIME
+                ABSTIME(WS-ABSTIME)
+                DDMMYYYY(WS-DATE-RAW)
+                DATESEP('/')
+                TIMESEP(':')
+                TIME(WS-TIME-FMT)
+           END-EXEC
+
+           MOVE WS-DATE-RAW TO DATEINO
+
+           MOVE WS-TIME-FMT TO TIMEINO
+      * TEMP DATA NO FROM FILE
+      *    MOVE '100'   TO  ACTLOANO.
+      *    MOVE '50000' TO  COLLTODO.
+      *    MOVE '12'    TO  OVRDUEO.
+      *    MOVE '3'     TO  DSPTOPENO.
+      *    MOVE '8'     TO  NEWTODO.
+      *    MOVE '2'     TO  CLOSEDO.
+           MOVE HIGH-VALUES TO SNO
+
+           EXEC CICS STARTBR
+                FILE('DASHFL')
+                RIDFLD(SNO)
+                GTEQ
+           END-EXEC
+
+           EXEC CICS READPREV
+                FILE('DASHFL')
+                INTO(DASH-REC)
+                RIDFLD(SNO)
+           END-EXEC
+           MOVE ACTIVE-LNS   TO  ACTLOANO.
+           MOVE TOD-COLLN    TO  COLLTODO.
+           MOVE OVERDUE-ACC  TO  OVRDUEO.
+           MOVE DISPUTES     TO  DSPTOPENO.
+           MOVE NEWUSERS     TO  NEWTODO.
+           MOVE CLOSED       TO  CLOSEDO.
+           EXEC CICS SEND
+                MAP('MADB')
+                MAPSET('MADB')
+                ERASE
+                FREEKB
+           END-EXEC.
+       PROCESS-INPUT.
+           EXEC CICS RECEIVE
+                MAP('MADB')
+                MAPSET('MADB')
+                RESP(WS-RESP)
+           END-EXEC
+           IF WS-RESP = DFHRESP(MAPFAIL)
+               PERFORM INITIAL-SCREEN
+           END-IF
+
+           MOVE CHOICEI TO WS-CHOICE
+           IF EIBAID = DFHPF3
+               EXEC CICS XCTL PROGRAM('PLOGN')
+               END-EXEC
+           END-IF
+           IF EIBAID = DFHPF5
+               PERFORM INITIAL-SCREEN
+           END-IF
+           IF EIBAID = DFHPF10
+               PERFORM VALIDATE-CHOICE
+           END-IF
+           PERFORM INITIAL-SCREEN.
+       VALIDATE-CHOICE.
+                   MOVE 'X' TO WS-SCREEN
+           EVALUATE WS-CHOICE
+               WHEN '1'
+                   EXEC CICS XCTL PROGRAM('PMAPD')
+                   END-EXEC
+               WHEN '2'
+                   EXEC CICS XCTL PROGRAM('PMAOV')
+                   END-EXEC
+               WHEN '3'
+                   EXEC CICS XCTL PROGRAM('PMADEL')
+                                  COMMAREA(WS-SCREEN)
+                                  LENGTH(1)
+                   END-EXEC
+               WHEN '4'
+                   EXEC CICS XCTL PROGRAM('PMADM')
+                   END-EXEC
+               WHEN '5'
+                   EXEC CICS XCTL PROGRAM('PCONT')
+                   END-EXEC
+               WHEN OTHER
+                   PERFORM INVALID-MSG
+           END-EVALUATE.
+       INVALID-MSG.
+           MOVE 'INVALID OPTION - TRY AGAIN' TO WS-MSG.
+           DISPLAY WS-MSG.
+

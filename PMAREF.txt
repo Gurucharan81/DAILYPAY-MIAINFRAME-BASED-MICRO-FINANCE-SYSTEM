@@ -1,0 +1,361 @@
+       IDENTIFICATION DIVISION.                                         00010006
+       PROGRAM-ID. RFPGM.                                               00020006
+                                                                        00030006
+       DATA DIVISION.                                                   00040006
+       WORKING-STORAGE SECTION.                                         00050006
+                                                                        00060006
+       COPY DFHAID.                                                     00070006
+       COPY MAREF.                                                      00080006
+                                                                        00090006
+       01 WS-AID        PIC X.                                          00100006
+       01 WS-RESP       PIC S9(8) COMP.                                 00110006
+       01 WS-ERROR-FLAG PIC X VALUE 'N'.                                00120006
+                                                                        00130006
+       01 WS-AMT        PIC 9(5) VALUE 0.                               00140006
+       01 WS-AMT-X      PIC X(5).                                       00150006
+                                                                        00160006
+       01 WS-TRN-ID     PIC X(11).                                      00170006
+       01 WS-LOAN-SEQ   PIC 9(2).                                       00180006
+      **---------------- LOAN FILE ----------------*                    00190006
+       01 WS-LOAN-REC.                                                  00200006
+          05 LOAN-ID         PIC X(6).                                  00210006
+          05 CUST-ID         PIC 9(5).                                  00220006
+          05 SANC-AMT        PIC 9(6).                                  00230006
+          05 EMI-START       PIC X(10).                                 00240006
+          05 EMI-END         PIC X(10).                                 00250006
+          05 INTEREST        PIC 9(2).                                  00260006
+          05 EMI-AMT         PIC 9(6).                                  00270006
+          05 GRACE-DAYS      PIC 9(2).                                  00280006
+          05 PENALTY-AMT     PIC 9(3).                                  00290006
+          05 PAY-MODE        PIC X(3).                                  00300006
+          05 PROC-DATE       PIC X(10).                                 00310006
+          05 TOTAL-PAID      PIC 9(6).                                  00320006
+          05 NEXT-DUE        PIC 9(6).                                  00330006
+          05 STATUS1         PIC X(6).                                  00340006
+          05 TENURE          PIC 9(3).                                  00350006
+          05 OVERDUE-AMT     PIC 9(6).                                  00360006
+          05 NO-OF-EMI       PIC 9(3).                                  00370006
+          05 FORECLOSURE     PIC 9(6).                                  00380006
+          05 DUE-DAYS        PIC 9(3).                                  00390006
+          05 DUE-AMT         PIC 9(6).                                  00400006
+          05 RISK-SCORE      PIC 99.                                    00410006
+                                                                        00420006
+      **---------------- CUSTOMER FILE ----------------*                00430006
+       01 WS-CUST-REC.                                                  00440006
+          05 CUST-ID1       PIC X(5).                                   00450006
+          05 CUST-AADH      PIC X(12).                                  00460006
+          05 CUST-NAME      PIC X(20).                                  00470006
+          05 CUST-DOB       PIC X(10).                                  00480006
+          05 AGE            PIC 9(3).                                   00490006
+          05 GENDER         PIC X(6).                                   00500006
+          05 MOBILE         PIC X(10).                                  00510006
+          05 ADDRESS2       PIC X(23).                                  00520006
+          05 OCCUPATION     PIC X(20).                                  00530006
+          05 INCOME         PIC 9(6).                                   00540006
+          05 NOM-NAME       PIC X(20).                                  00550006
+          05 NOM-REL        PIC X(10).                                  00560006
+          05 NOM-MOB        PIC 9(10).                                  00570006
+          05 NOM-AADH       PIC X(12).                                  00580006
+          05 LOAN-SEQ       PIC 9(1).                                   00590006
+          05 FILLER         PIC X(32).                                  00600006
+      **---------------- BANK FILE ----------------*                    00610006
+       01 WS-BANK-REC.                                                  00620006
+          05 BF-BANK-ACC    PIC X(10).                                  00630006
+          05 BF-CUST-NAME   PIC X(20).                                  00640006
+          05 BF-BANK-NAME   PIC X(20).                                  00650006
+          05 BF-BANK-PIN    PIC X(05).                                  00660006
+          05 BF-BALANCE     PIC 9(04)V99.                               00670006
+          05 FILLER         PIC X(19).                                  00680006
+                                                                        00690006
+      **---------------- TRANSACTION FILE ----------------*             00700006
+       01 WS-TRAN-REC.                                                  00710006
+          05 TF-TRAN-ID     PIC X(11).                                  00720006
+          05 TF-LOAN-ID     PIC X(06).                                  00730006
+          05 TF-CUST-ID     PIC X(05).                                  00740006
+          05 TF-NAME        PIC X(10).                                  00750011
+          05 TF-STATUS      PIC X(08).                                  00760006
+          05 TF-ACT-AMT     PIC 9(06).                                  00770011
+          05 TF-PAID-AMT    PIC 9(06).                                  00780011
+          05 TF-TYPE        PIC X(01).                                  00780110
+          05 TF-YORN        PIC X.                                      00781010
+          05 FILLER         PIC X(26).                                  00810011
+                                                                        00820006
+       LINKAGE SECTION.                                                 00830006
+       01 DFHCOMMAREA   PIC X(100).                                     00840006
+                                                                        00850006
+       01 WS-CM REDEFINES DFHCOMMAREA.                                  00860006
+          05 CA-LOANID  PIC X(6).                                       00870006
+          05 CA-CUSTID  PIC X(5).                                       00880006
+          05 CA-DATE    PIC X(10).                                      00890006
+          05 CA-INIT    PIC X.                                          00900006
+          05 FILLER     PIC X(78).                                      00910006
+                                                                        00920006
+       PROCEDURE DIVISION USING DFHCOMMAREA.                            00930006
+                                                                        00940006
+           MOVE EIBAID TO WS-AID                                        00950006
+                                                                        00960006
+           IF EIBCALEN = 0                                              00970006
+               PERFORM INIT-SCREEN                                      00980006
+           ELSE                                                         00990006
+               IF CA-INIT = 'Y'                                         01000006
+                   PERFORM RECEIVE-SCREEN                               01010006
+                   PERFORM PROCESS-LOGIC                                01020006
+               ELSE                                                     01030006
+                   PERFORM INIT-SCREEN                                  01040006
+               END-IF                                                   01050006
+           END-IF                                                       01060006
+                                                                        01070006
+           EXEC CICS RETURN                                             01080006
+                TRANSID('TMRF')                                         01090006
+                COMMAREA(DFHCOMMAREA)                                   01100006
+                LENGTH(100)                                             01110006
+           END-EXEC.                                                    01120006
+                                                                        01130006
+       INIT-SCREEN.                                                     01140006
+                                                                        01150006
+           MOVE LOW-VALUES TO MAREFO                                    01160006
+                                                                        01170006
+           MOVE CA-CUSTID TO CIDINO                                     01180006
+           MOVE CA-LOANID TO LOANINO                                    01190006
+           MOVE CA-DATE   TO DATEINO                                    01200006
+                                                                        01210006
+           MOVE CA-CUSTID TO CUST-ID1                                   01220006
+                                                                        01230006
+           EXEC CICS READ                                               01240006
+                FILE('CUSTFL')                                          01250012
+                INTO(WS-CUST-REC)                                       01260006
+                RIDFLD(CUST-ID1)                                        01270006
+                RESP(WS-RESP)                                           01280006
+           END-EXEC                                                     01290006
+                                                                        01300006
+           IF WS-RESP = DFHRESP(NORMAL)                                 01310006
+               MOVE CUST-NAME TO NAMEINO                                01320006
+           ELSE                                                         01330006
+               MOVE 'CUST NOT FOUND' TO SMSIN1O                         01340006
+           END-IF                                                       01350006
+                                                                        01360006
+           MOVE 'Y' TO CA-INIT                                          01370006
+                                                                        01380006
+           PERFORM SEND-SCREEN.                                         01390006
+                                                                        01400006
+       RECEIVE-SCREEN.                                                  01410006
+                                                                        01420006
+           EXEC CICS RECEIVE                                            01430006
+                MAP('MAREF')                                            01440006
+                MAPSET('MAREF')                                         01450006
+                RESP(WS-RESP)                                           01460006
+           END-EXEC                                                     01470006
+                                                                        01480006
+           IF WS-RESP = DFHRESP(MAPFAIL)                                01490006
+               MOVE 0 TO WS-AMT                                         01500006
+           ELSE                                                         01510006
+               MOVE AMTINI TO WS-AMT-X                                  01520006
+                                                                        01530006
+               IF WS-AMT-X NUMERIC                                      01540006
+                   MOVE WS-AMT-X TO WS-AMT                              01550006
+               ELSE                                                     01560006
+                   MOVE 0 TO WS-AMT                                     01570006
+               END-IF                                                   01580006
+           END-IF.                                                      01590006
+                                                                        01600006
+       PROCESS-LOGIC.                                                   01610006
+                                                                        01620006
+           EVALUATE WS-AID                                              01630006
+                                                                        01640006
+               WHEN DFHENTER                                            01650006
+                   PERFORM VALIDATE-DATA                                01660006
+                                                                        01670006
+                   IF WS-ERROR-FLAG = 'N'                               01680006
+                       PERFORM READ-LOAN                                01690006
+                                                                        01700006
+                       IF WS-RESP = DFHRESP(NORMAL)                     01710006
+                           PERFORM PROCESS-REFUND                       01720006
+                       ELSE                                             01730006
+                           MOVE 'LOAN NOT FOUND' TO SMSIN1O             01740006
+                       END-IF                                           01750006
+                   END-IF                                               01760006
+                                                                        01770006
+                   PERFORM SEND-SCREEN                                  01780006
+                                                                        01790006
+               WHEN DFHPF3                                              01800006
+                   EXEC CICS XCTL                                       01810006
+                        PROGRAM('PMADM')                                01820009
+                   END-EXEC                                             01830006
+                                                                        01840006
+               WHEN OTHER                                               01850006
+                   PERFORM SEND-SCREEN                                  01860006
+                                                                        01870006
+           END-EVALUATE.                                                01880006
+                                                                        01890006
+       VALIDATE-DATA.                                                   01900006
+                                                                        01910006
+           MOVE 'N'    TO WS-ERROR-FLAG                                 01920006
+           MOVE SPACES TO SMSIN1O                                       01930006
+                                                                        01940006
+           IF WS-AMT = 0                                                01950006
+               MOVE 'ENTER VALID AMOUNT' TO SMSIN1O                     01960006
+               MOVE 'Y' TO WS-ERROR-FLAG                                01970006
+                                                                        01980006
+           ELSE                                                         01990006
+               EVALUATE PMODEINI                                        02000006
+                                                                        02010006
+                   WHEN '1'                                             02020006
+                       IF ACCINI = SPACES                               02030006
+                           MOVE 'ENTER ACCOUNT NO' TO SMSIN1O           02040006
+                           MOVE 'Y' TO WS-ERROR-FLAG                    02050006
+                       END-IF                                           02060006
+                                                                        02070006
+                       IF BANKINI = SPACES                              02080006
+                           MOVE 'ENTER BANK NAME' TO SMSIN1O            02090006
+                           MOVE 'Y' TO WS-ERROR-FLAG                    02100006
+                       END-IF                                           02110006
+                                                                        02120006
+                   WHEN '2'                                             02130006
+                       CONTINUE                                         02140006
+                                                                        02150006
+                   WHEN OTHER                                           02160006
+                       MOVE 'INVALID MODE' TO SMSIN1O                   02170006
+                       MOVE 'Y' TO WS-ERROR-FLAG                        02180006
+                                                                        02190006
+               END-EVALUATE                                             02200006
+           END-IF.                                                      02210006
+                                                                        02220006
+       READ-LOAN.                                                       02230006
+                                                                        02240006
+           MOVE CA-LOANID TO LOAN-ID                                    02250006
+                                                                        02260006
+           EXEC CICS READ                                               02270006
+                FILE('CUSTFL')                                          02280012
+                INTO(WS-LOAN-REC)                                       02290006
+                RIDFLD(LOAN-ID)                                         02300006
+                UPDATE                                                  02310006
+                RESP(WS-RESP)                                           02320006
+           END-EXEC.                                                    02330006
+                                                                        02340006
+       PROCESS-REFUND.                                                  02350006
+                                                                        02360006
+           EVALUATE PMODEINI                                            02370006
+               WHEN '1'                                                 02380006
+                   PERFORM PROCESS-BANK                                 02390006
+               WHEN '2'                                                 02400006
+                   PERFORM PROCESS-CASH                                 02410006
+           END-EVALUATE.                                                02420006
+                                                                        02430006
+       PROCESS-CASH.                                                    02440006
+                                                                        02450006
+           COMPUTE TOTAL-PAID = TOTAL-PAID + WS-AMT                     02460006
+                                                                        02470006
+           PERFORM COMMON-UPDATE                                        02480006
+                                                                        02490006
+           MOVE 'CASH REFUND SUCCESS' TO SMSIN1O.                       02500006
+                                                                        02510006
+       PROCESS-BANK.                                                    02520006
+                                                                        02530006
+           MOVE 'N' TO WS-ERROR-FLAG                                    02540006
+           MOVE SPACES TO BF-BANK-ACC                                   02550007
+           MOVE ACCINI TO BF-BANK-ACC                                   02560006
+                                                                        02570006
+           EXEC CICS READ                                               02580006
+                FILE('BANKDL')                                          02590012
+                INTO(WS-BANK-REC)                                       02600006
+                RIDFLD(BF-BANK-ACC)                                     02610006
+                UPDATE                                                  02620006
+                RESP(WS-RESP)                                           02630006
+           END-EXEC                                                     02640006
+                                                                        02650006
+           IF WS-RESP NOT = DFHRESP(NORMAL)                             02660006
+               MOVE 'INVALID ACCOUNT' TO SMSIN1O                        02670006
+               MOVE 'Y' TO WS-ERROR-FLAG                                02680006
+           END-IF                                                       02690006
+                                                                        02700006
+           IF WS-ERROR-FLAG = 'N'                                       02710006
+             IF BF-BANK-NAME NOT = BANKINI                              02720008
+                   MOVE 'BANK NAME MISMATCH' TO SMSIN1O                 02730006
+                   MOVE 'Y' TO WS-ERROR-FLAG                            02740006
+             END-IF                                                     02750008
+           END-IF                                                       02760006
+                                                                        02770006
+           IF WS-ERROR-FLAG = 'N'                                       02780006
+               COMPUTE BF-BALANCE = BF-BALANCE + WS-AMT                 02790006
+                                                                        02800006
+               EXEC CICS REWRITE                                        02810006
+                    FILE('BANKDL')                                      02820012
+                    FROM(WS-BANK-REC)                                   02830006
+                    RESP(WS-RESP)                                       02840006
+               END-EXEC                                                 02850006
+           END-IF                                                       02860006
+                                                                        02870006
+           IF WS-ERROR-FLAG = 'N'                                       02880006
+               COMPUTE TOTAL-PAID = TOTAL-PAID + WS-AMT                 02890006
+                                                                        02900006
+               PERFORM COMMON-UPDATE                                    02910006
+                                                                        02920006
+               MOVE 'BANK REFUND SUCCESS' TO SMSIN1O                    02930006
+           END-IF.                                                      02940006
+                                                                        02950006
+       COMMON-UPDATE.                                                   02960006
+                                                                        02970006
+           PERFORM BUILD-TRN-ID                                         02980006
+           PERFORM WRITE-TRN                                            02990006
+           PERFORM UPDATE-LOAN                                          03000006
+                                                                        03010006
+           EXEC CICS REWRITE                                            03020006
+                FILE('CUSTFL')                                          03030012
+                FROM(WS-CUST-REC)                                       03040006
+                RESP(WS-RESP)                                           03050006
+           END-EXEC.                                                    03060006
+                                                                        03070006
+       BUILD-TRN-ID.                                                    03080006
+                                                                        03090006
+           ADD 1 TO WS-LOAN-SEQ                                         03100006
+                                                                        03110006
+           IF WS-LOAN-SEQ > 9                                           03120006
+               MOVE 1 TO WS-LOAN-SEQ                                    03130006
+           END-IF                                                       03140006
+                                                                        03150006
+           MOVE CA-LOANID TO WS-TRN-ID(1:6)                             03160006
+           MOVE FUNCTION CURRENT-DATE(7:2) TO WS-TRN-ID(7:2)            03170006
+           MOVE FUNCTION CURRENT-DATE(5:2) TO WS-TRN-ID(9:2)            03180006
+           MOVE '2'  TO WS-TRN-ID(11:1).                                03190012
+                                                                        03200006
+       WRITE-TRN.                                                       03210006
+           MOVE WS-TRN-ID TO TF-TRAN-ID                                 03210112
+           EXEC CICS DELETE                                             03211012
+                FILE('TRANFL')                                          03212012
+                RIDFLD(TF-TRAN-ID)                                      03213012
+           END-EXEC                                                     03220012
+           MOVE CA-LOANID TO TF-LOAN-ID                                 03240006
+           MOVE CA-CUSTID TO TF-CUST-ID                                 03250006
+           MOVE NAMEINO   TO TF-NAME                                    03260006
+           MOVE 'REFUND'  TO TF-STATUS                                  03270006
+           MOVE WS-AMT    TO TF-ACT-AMT                                 03280006
+           MOVE WS-AMT    TO TF-PAID-AMT                                03290006
+           MOVE 'R'       TO TF-TYPE                                    03300006
+           MOVE 'Y'       TO TF-TORN                                    03301010
+      *    MOVE CA-DATE   TO TF-DATE                                    03310010
+                                                                        03320006
+           EXEC CICS WRITE                                              03330006
+                FILE('TRANFL')                                          03340012
+                FROM(WS-TRAN-REC)                                       03350006
+                RIDFLD(TF-TRAN-ID)                                      03360006
+                RESP(WS-RESP)                                           03370006
+           END-EXEC.                                                    03380006
+                                                                        03390006
+       UPDATE-LOAN.                                                     03400006
+                                                                        03410006
+           EXEC CICS REWRITE                                            03420006
+                FILE('LOANFL')                                          03430012
+                FROM(WS-LOAN-REC)                                       03440006
+                RESP(WS-RESP)                                           03450006
+           END-EXEC.                                                    03460006
+                                                                        03470006
+       SEND-SCREEN.                                                     03480006
+                                                                        03490006
+           EXEC CICS SEND                                               03500006
+                MAP('MAREF')                                            03510006
+                MAPSET('MAREF')                                         03520006
+                FROM(MAREFO)                                            03530006
+                ERASE                                                   03540006
+                FREEKB                                                  03550006
+           END-EXEC.                                                    03560006
+

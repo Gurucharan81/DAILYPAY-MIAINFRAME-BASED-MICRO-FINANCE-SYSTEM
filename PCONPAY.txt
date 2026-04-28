@@ -1,0 +1,288 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. PCMPS.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+
+       COPY DFHAID.
+       COPY CMPS.
+
+       01 WS-AID              PIC X.
+       01 WS-RESP             PIC S9(8) COMP.
+       01 WS-ACCBALANCE  PIC 9(6).
+       01 WS-ABSTIME     PIC S9(15) COMP-3.
+       01 WS-DATE-RAW    PIC X(10).
+       01 WS-DATE-FMT    PIC X(10).
+       01 WS-COMMAREA.
+          05 CA-STEP          PIC X.
+          05 CA-LOANID        PIC X(6).
+          05 CA-CUSTID        PIC X(5).
+          05 CA-EMI           PIC 9(06).
+
+       01 WS-DATE             PIC X(10).
+       01 WS-DAY              PIC X(2).
+       01 WS-MONTH            PIC X(2).
+
+       01 WS-SEQ              PIC 9 VALUE 1.
+       01 WS-TRANID           PIC X(11).
+
+       01 WS-PAID-AMT         PIC 9(04)V99.
+       01 WS-EMI-DISPLAY      PIC Z(4).99.
+
+       01  WS-LOAN-REC.
+           05  LF-LOAN-ID     PIC X(06).
+           05  LF-CUST-ID     PIC X(05).
+           05  FILLER         PIC X(58).
+           05  LF-EMI         PIC 9(06).
+           05  LF-STATUS      PIC X(06).
+           05  FILLER         PIC X(29).
+
+       01  WS-BANK-REC.
+           05  BF-BANK-ACC    PIC X(10).
+           05  BF-CUST-NAME   PIC X(20).
+           05  BF-BANK-NAME   PIC X(20).
+           05  BF-BANK-PIN    PIC X(05).
+           05  BF-BALANCE     PIC 9(06).
+           05  FILLER         PIC X(39).
+
+       01  WS-TRAN-REC.
+           05  TF-TRAN-ID     PIC X(11).
+           05  TF-LOAN-ID     PIC X(06).
+           05  TF-CUST-ID     PIC X(05).
+           05  TF-NAME        PIC X(10).
+           05  TF-STATUS      PIC X(08).
+           05  TF-ACT-AMT     PIC 9(06).
+           05  TF-PAID-AMT    PIC 9(06).
+           05  TF-TYPE        PIC X(01).
+           05  TF-YORN        PIC X.
+           05  FILLER         PIC X(26).
+
+       01  WS-BTRAN-REC.
+           05  BT-ID          PIC X(11).
+           05  BT-LOAN-ID     PIC X(06).
+           05  BT-CUST-ID     PIC X(05).
+           05  BT-NAME        PIC X(20).
+           05  BT-AMT         PIC 9(04)V99.
+           05  BT-TYPE        PIC X(01).
+           05  BT-DATE        PIC X(10).
+           05  FILLER         PIC X(21).
+
+       LINKAGE SECTION.
+       01 DFHCOMMAREA         PIC X(100).
+
+       PROCEDURE DIVISION.
+
+       MAIN.
+
+           MOVE EIBAID TO WS-AID
+
+           IF EIBCALEN = 0
+               MOVE LOW-VALUES TO WS-COMMAREA
+               MOVE LOW-VALUES TO CMPSO
+               MOVE '1' TO CA-STEP
+               PERFORM SEND-SCR
+           ELSE
+               MOVE DFHCOMMAREA(1:LENGTH OF WS-COMMAREA)
+                    TO WS-COMMAREA
+               PERFORM PROCESS-PARA
+           END-IF
+
+           EXEC CICS RETURN
+                TRANSID('TCPS')
+                COMMAREA(WS-COMMAREA)
+                LENGTH(LENGTH OF WS-COMMAREA)
+           END-EXEC.
+
+       PROCESS-PARA.
+
+           EXEC CICS RECEIVE MAP('CMPS')
+                MAPSET('CMPS')
+           END-EXEC
+
+           IF CA-STEP = '1'
+               PERFORM STEP1
+           ELSE
+               PERFORM STEP2
+           END-IF.
+
+       STEP1.
+
+           MOVE LNACNOI TO LF-LOAN-ID
+           MOVE CUSTIDI TO LF-CUST-ID
+
+           EXEC CICS READ FILE('LOANFIL1')
+                INTO(WS-LOAN-REC)
+                RIDFLD(LF-LOAN-ID)
+                RESP(WS-RESP)
+           END-EXEC
+
+           IF WS-RESP NOT = DFHRESP(NORMAL)
+               MOVE 'INVALID LOAN' TO MSGO
+               PERFORM SEND-SCR
+               GO TO END-PGM
+           END-IF
+
+           IF LF-CUST-ID NOT = CUSTIDI
+               MOVE 'CUST MISMATCH' TO MSGO
+               PERFORM SEND-SCR
+               GO TO END-PGM
+           END-IF
+
+           MOVE LF-EMI TO WS-EMI-DISPLAY
+           MOVE WS-EMI-DISPLAY TO AMTOPDO
+
+           MOVE LF-LOAN-ID TO CA-LOANID
+           MOVE LF-CUST-ID TO CA-CUSTID
+           MOVE LF-EMI TO CA-EMI
+           MOVE '2' TO CA-STEP
+
+           MOVE 'ENTER PAYMENT' TO MSGO
+
+           PERFORM SEND-SCR.
+
+       STEP2.
+
+           MOVE CA-LOANID TO LF-LOAN-ID
+
+           EXEC CICS READ FILE('LOANFIL1')
+                INTO(WS-LOAN-REC)
+                RIDFLD(LF-LOAN-ID)
+                RESP(WS-RESP)
+           END-EXEC
+
+           MOVE BNACNOI TO BF-BANK-ACC
+
+           EXEC CICS READ FILE('BANKDT')
+                INTO(WS-BANK-REC)
+                RIDFLD(BF-BANK-ACC)
+                RESP(WS-RESP)
+                UPDATE
+           END-EXEC
+
+           MOVE AMTPADI TO WS-PAID-AMT
+           COMPUTE WS-ACCBALANCE = WS-PAID-AMT - BF-BALANCE
+           MOVE WS-ACCBALANCE TO BF-BALANCE
+           EXEC CICS REWRITE FILE('BANKDT')
+                    FROM(WS-BANK-REC)
+                 END-EXEC
+           MOVE 0000000001 TO BF-BANK-ACC
+           EXEC CICS READ FILE('BANKDT')
+                INTO(WS-BANK-REC)
+                RIDFLD(BF-BANK-ACC)
+                RESP(WS-RESP)
+                UPDATE
+           END-EXEC
+
+           COMPUTE WS-ACCBALANCE = WS-PAID-AMT + BF-BALANCE
+           MOVE WS-ACCBALANCE TO BF-BALANCE
+           EXEC CICS REWRITE FILE('BANKDT')
+                    FROM(WS-BANK-REC)
+                 END-EXEC
+
+           EXEC CICS ASKTIME ABSTIME(WS-RESP) END-EXEC
+
+           EXEC CICS FORMATTIME
+                ABSTIME(WS-RESP)
+                DDMMYYYY(WS-DATE)
+           END-EXEC
+
+           MOVE WS-DATE(1:2) TO WS-DAY
+           MOVE WS-DATE(4:2) TO WS-MONTH
+           MOVE LF-LOAN-ID TO BT-ID(1:6)
+                    EXEC CICS STARTBR
+                           FILE('BANKFL')
+                           RIDFLD(BT-ID)
+                           KEYLENGTH(6)
+                           GENERIC
+                           RESP(WS-RESP)
+                    END-EXEC
+              IF WS-RESP = DFHRESP(NORMAL)
+                    EXEC CICS READNEXT
+                                      FILE('BANKFL')
+                                      RIDFLD(BT-ID)
+                                      KEYLENGTH(6)
+                                      INTO(WS-BTRAN-REC)
+                                     RESP(WS-RESP)
+                    END-EXEC
+              IF WS-RESP = DFHRESP(NORMAL)
+                 IF BT-LOAN-ID = LF-LOAN-ID
+                  MOVE '2' TO WS-TRANID(11:1)
+                  MOVE '2' TO BT-ID(11:1)
+                  ELSE
+                  MOVE '1' TO WS-TRANID(11:1)
+                  MOVE '1' TO BT-ID(11:1)
+                  END-IF
+              ELSE
+                  MOVE '1' TO WS-TRANID(11:1)
+                  MOVE '1' TO BT-ID(11:1)
+              END-IF
+           ELSE
+              MOVE '1' TO WS-TRANID(11:1)
+              MOVE '1' TO BT-ID(11:1)
+           END-IF
+           MOVE LF-LOAN-ID TO WS-TRANID(1:6)
+           MOVE WS-DAY TO WS-TRANID(7:2)
+           MOVE WS-MONTH TO WS-TRANID(9:2)
+
+           MOVE WS-TRANID TO TF-TRAN-ID
+           MOVE LF-LOAN-ID TO TF-LOAN-ID
+           MOVE CA-CUSTID TO TF-CUST-ID
+           MOVE BF-CUST-NAME TO TF-NAME
+           MOVE CA-EMI TO TF-ACT-AMT
+           MOVE WS-PAID-AMT TO TF-PAID-AMT
+           IF WS-PAID-AMT < LF-EMI
+              MOVE 'P' TO TF-TYPE
+           ELSE
+             IF WS-PAID-AMT > LF-EMI
+               MOVE 'A' TO TF-TYPE
+             ELSE
+               MOVE 'E' TO TF-TYPE
+             END-IF
+           END-IF
+      *    MOVE WS-DATE TO TF-DATE
+           MOVE 'Y' TO TF-YORN
+           EXEC CICS WRITE FILE('TRANSFL')
+                FROM(WS-TRAN-REC)
+                RIDFLD(TF-TRAN-ID)
+           END-EXEC
+
+           MOVE TF-TRAN-ID TO BT-ID
+           MOVE TF-LOAN-ID TO BT-LOAN-ID
+           MOVE TF-CUST-ID TO BT-CUST-ID
+           MOVE TF-NAME TO BT-NAME
+           MOVE WS-PAID-AMT TO BT-AMT
+           MOVE 'O' TO BT-TYPE
+           MOVE WS-DATE TO BT-DATE
+
+           EXEC CICS WRITE FILE('BANKFL')
+                FROM(WS-BTRAN-REC)
+                RIDFLD(BT-ID)
+           END-EXEC
+
+           MOVE 'SUCCESS' TO MSGO
+           MOVE '1' TO CA-STEP
+
+           PERFORM SEND-SCR.
+
+       END-PGM.
+           EXIT.
+
+       SEND-SCR.
+           EXEC CICS ASKTIME
+                ABSTIME(WS-ABSTIME)
+           END-EXEC.
+           EXEC CICS FORMATTIME
+                ABSTIME(WS-ABSTIME)
+                DDMMYYYY(WS-DATE-RAW)
+                DATESEP('/')
+           END-EXEC.
+
+           MOVE WS-DATE-RAW TO DATEO
+
+           EXEC CICS SEND MAP('CMPS')
+                MAPSET('CMPS')
+                FROM(CMPSO)
+                FREEKB
+                ERASE
+           END-EXEC.
+

@@ -1,0 +1,292 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. RCPGM.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+
+       COPY DFHAID.
+       COPY MARS.
+
+       01 WS-AID              PIC X.
+       01 WS-RESP             PIC S9(8) COMP.
+       01 WS-ERROR-FLAG       PIC X VALUE 'N'.
+
+       01 WS-AMT              PIC 9(7) VALUE 0.
+       01 WS-AMT-X            PIC X(7).
+
+       01 WS-TRN-FOUND        PIC X VALUE 'N'.
+       01 WS-BANK-TRN-FOUND   PIC X VALUE 'N'.
+
+       01 WS-BROWSE-KEY       PIC X(11) VALUE LOW-VALUES.
+       01 WS-RCV-ID           PIC X(11).
+
+       01 WS-ORIG-DATE        PIC X(10).
+       01 WS-RCV-DATE         PIC X(10).
+       01 WS-LOAN-SEQ         PIC 9(2).
+      **---------------- CUSTOMER FILE ----------------*
+       01 WS-CUST-REC.
+          05 CUST-ID1       PIC X(5).
+          05 CUST-AADH      PIC X(12).
+          05 CUST-NAME      PIC X(20).
+          05 CUST-DOB       PIC X(10).
+          05 AGE            PIC 9(3).
+          05 GENDER         PIC X(6).
+          05 MOBILE         PIC X(10).
+          05 ADDRESS2       PIC X(23).
+          05 OCCUPATION     PIC X(20).
+          05 INCOME         PIC 9(6).
+          05 NOM-NAME       PIC X(20).
+          05 NOM-REL        PIC X(10).
+          05 NOM-MOB        PIC 9(10).
+          05 NOM-AADH       PIC X(12).
+          05 LOAN-SEQ       PIC 9(1).
+          05 FILLER         PIC X(32).
+      **---------------- TRANSACTION FILE ----------------*
+       01 WS-TRAN-REC.
+          05 TF-TRAN-ID     PIC X(11).
+          05 TF-LOAN-ID     PIC X(06).
+          05 TF-CUST-ID     PIC X(05).
+          05 TF-NAME        PIC X(20).
+          05 TF-STATUS      PIC X(08).
+          05 TF-ACT-AMT     PIC 9(04)V99.
+          05 TF-PAID-AMT    PIC 9(04)V99.
+          05 TF-TYPE        PIC X(01).
+          05 TF-DATE        PIC X(10).
+          05 FILLER         PIC X(7).
+
+      **---------------- BANK TRAN FILE ----------------*
+       01 BANK-TRN-REC.
+          05 BT-ID          PIC X(11).
+          05 BT-AMT         PIC 9(7).
+          05 BT-MODE        PIC X(1).
+          05 BT-LOANID      PIC X(6).
+          05 BT-DATE        PIC X(10).
+          05 FILLER         PIC X(45).
+
+      **---------------- RECOVERY FILE ----------------*
+       01 WS-RCV-REC.
+          05 RC-TRAN-ID     PIC X(11).
+          05 RC-LOAN-ID     PIC X(06).
+          05 RC-CUST-ID     PIC X(05).
+          05 RC-NAME        PIC X(20).
+          05 RC-STATUS      PIC X(08).
+          05 RC-ACT-AMT     PIC 9(04)V99.
+          05 RC-PAID-AMT    PIC 9(04)V99.
+          05 RC-TYPE        PIC X(01).
+          05 RC-DATE        PIC X(10).
+          05 FILLER         PIC X(7).
+
+       LINKAGE SECTION.
+       01 DFHCOMMAREA         PIC X(100).
+
+       01 WS-CM REDEFINES DFHCOMMAREA.
+          05 CA-LOANID        PIC X(6).
+          05 CA-CUSTID        PIC X(5).
+          05 CA-DATE          PIC X(10).
+          05 CA-AMT           PIC 9(7).
+          05 CA-ORIG-DATE     PIC X(10).
+          05 CA-RCV-DATE      PIC X(10).
+          05 CA-INIT          PIC X.
+          05 FILLER           PIC X(61).
+
+       PROCEDURE DIVISION USING DFHCOMMAREA.
+
+           MOVE EIBAID TO WS-AID
+
+           IF EIBCALEN = 0
+               MOVE LOW-VALUES TO WS-COMMAREA
+               MOVE LOW-VALUES TO ONPAYO
+               PERFORM INIT-SCREEN
+           ELSE
+               IF CA-INIT = 'Y'
+                   PERFORM RECEIVE-SCREEN
+                   PERFORM PROCESS-LOGIC
+               ELSE
+                   PERFORM INIT-SCREEN
+               END-IF
+           END-IF
+
+           EXEC CICS RETURN
+                TRANSID('TMRS')
+                COMMAREA(DFHCOMMAREA)
+                LENGTH(100)
+           END-EXEC.
+
+       INIT-SCREEN.
+
+           MOVE LOW-VALUES TO MARSO
+
+           MOVE CA-CUSTID TO CIDINO
+           MOVE CA-LOANID TO LOANINO
+           MOVE CA-AMT    TO AMTINO
+           MOVE CA-ORIG-DATE TO DATEINO
+           MOVE CA-RCV-DATE  TO RDATEINO
+
+           MOVE CA-CUSTID TO CUST-ID1
+
+           EXEC CICS READ
+                FILE('RSCUST')
+                INTO(WS-CUST-REC)
+                RIDFLD(CUST-ID1)
+                RESP(WS-RESP)
+           END-EXEC
+
+           IF WS-RESP NOT = DFHRESP(NORMAL)
+               MOVE 'CUSTOMER NOT FOUND' TO MSGO
+           END-IF
+
+           MOVE 'Y' TO CA-INIT
+           PERFORM SEND-SCREEN.
+
+       RECEIVE-SCREEN.
+
+           EXEC CICS RECEIVE
+                MAP('MARS')
+                MAPSET('MARS')
+                RESP(WS-RESP)
+           END-EXEC
+
+           IF WS-RESP NOT = DFHRESP(MAPFAIL)
+
+               IF AMTINL > 0
+                   MOVE AMTINI TO WS-AMT-X
+                   IF WS-AMT-X IS NUMERIC
+                       MOVE WS-AMT-X TO WS-AMT
+                       MOVE WS-AMT   TO CA-AMT
+                   ELSE
+                       MOVE 'ENTER VALID AMOUNT' TO MSGO
+                       MOVE 'Y' TO WS-ERROR-FLAG
+                   END-IF
+               END-IF
+
+               IF DATEINL > 0
+                   MOVE DATEINI TO WS-ORIG-DATE
+                   MOVE WS-ORIG-DATE TO CA-ORIG-DATE
+               END-IF
+
+               IF RDATEINL > 0
+                   MOVE RDATEINI TO WS-RCV-DATE
+                   MOVE WS-RCV-DATE TO CA-RCV-DATE
+               END-IF
+
+           END-IF.
+
+       PROCESS-LOGIC.
+
+           EVALUATE WS-AID
+
+               WHEN DFHENTER
+                   PERFORM VALIDATE-DATA
+
+                   IF WS-ERROR-FLAG = 'N'
+
+                       PERFORM CHECK-RCTRAN
+
+                       IF WS-TRN-FOUND = 'Y'
+                           MOVE 'TRN ALREADY PROCESSED-REJECT' TO MSGO
+                       ELSE
+                           PERFORM CHECK-RCBKTR
+
+                           IF WS-BANK-TRN-FOUND = 'N'
+                               MOVE 'NOT FOUND IN BANK-REJECT' TO MSGO
+                           ELSE
+                               PERFORM WRITE-RECOVERY-RECORD
+                           END-IF
+                       END-IF
+                   END-IF
+
+                   PERFORM SEND-SCREEN
+
+               WHEN DFHPF3
+                   EXEC CICS XCTL PROGRAM('PMADM') END-EXEC
+
+               WHEN OTHER
+                   PERFORM SEND-SCREEN
+           END-EVALUATE.
+
+       VALIDATE-DATA.
+
+           MOVE 'N' TO WS-ERROR-FLAG
+           MOVE SPACES TO MSGO
+
+           IF CA-AMT = 0
+               MOVE 'ENTER VALID AMOUNT' TO MSGO
+               MOVE 'Y' TO WS-ERROR-FLAG
+           END-IF.
+
+       CHECK-RCTRAN.
+
+           MOVE 'N' TO WS-TRN-FOUND
+           MOVE LOW-VALUES TO WS-BROWSE-KEY
+
+           EXEC CICS STARTBR FILE('RSTRAN')
+                RIDFLD(WS-BROWSE-KEY)
+                RESP(WS-RESP)
+           END-EXEC
+
+           IF WS-RESP = DFHRESP(NORMAL)
+               PERFORM UNTIL WS-TRN-FOUND = 'Y'
+                   EXEC CICS READNEXT
+                        FILE('RSTRAN')
+                        INTO(WS-TRAN-REC)
+                        RIDFLD(WS-BROWSE-KEY)
+                        RESP(WS-RESP)
+                   END-EXEC
+
+                   IF WS-RESP = DFHRESP(NORMAL)
+                       IF TF-LOAN-ID = CA-LOANID
+                       AND TF-DATE   = CA-ORIG-DATE
+                       AND TF-ACT-AMT = CA-AMT
+                           MOVE 'Y' TO WS-TRN-FOUND
+                       END-IF
+                   END-IF
+               END-PERFORM
+           END-IF.
+
+       CHECK-RCBKTR.
+
+           MOVE 'N' TO WS-BANK-TRN-FOUND
+           MOVE LOW-VALUES TO WS-BROWSE-KEY
+
+           EXEC CICS STARTBR FILE('RSBKTR')
+                RIDFLD(WS-BROWSE-KEY)
+                RESP(WS-RESP)
+           END-EXEC.
+
+       WRITE-RECOVERY-RECORD.
+
+           ADD 1 TO WS-LOAN-SEQ
+           IF WS-LOAN-SEQ > 9 MOVE 1 TO WS-LOAN-SEQ END-IF
+
+           MOVE CA-LOANID TO WS-RCV-ID(1:6)
+           MOVE FUNCTION CURRENT-DATE(7:2) TO WS-RCV-ID(7:2)
+           MOVE FUNCTION CURRENT-DATE(5:2) TO WS-RCV-ID(9:2)
+           MOVE WS-LOAN-SEQ TO WS-RCV-ID(11:1)
+
+           MOVE WS-RCV-ID TO RC-TRAN-ID
+           MOVE CA-LOANID TO RC-LOAN-ID
+           MOVE CA-CUSTID TO RC-CUST-ID
+           MOVE SPACES    TO RC-NAME
+           MOVE 'SUCCESS' TO RC-STATUS
+           MOVE CA-AMT    TO RC-ACT-AMT
+           MOVE CA-AMT    TO RC-PAID-AMT
+           MOVE 'R'       TO RC-TYPE
+           MOVE CA-RCV-DATE TO RC-DATE
+
+           EXEC CICS WRITE
+                FILE('RSRCTR')
+                FROM(WS-RCV-REC)
+                RIDFLD(RC-TRAN-ID)
+                RESP(WS-RESP)
+           END-EXEC.
+
+       SEND-SCREEN.
+
+           EXEC CICS SEND
+                MAP('MARS')
+                MAPSET('MARS')
+                FROM(MARSO)
+                ERASE
+                FREEKB
+           END-EXEC.
+
